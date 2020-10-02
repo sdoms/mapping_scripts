@@ -2,11 +2,16 @@ setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DN
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/")
 library(ggplot2)
 library(patchwork)
+library(dplyr)
 musdom <- read.csv("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/consensus_mus_dom.csv", sep=",")
 load("../../../Cleaning_snps/consensus_F0_all.Rdata")
 parents <- as.data.frame(reduced_geno)
 parents$X <- rownames(parents)
-musdom <- merge(musdom, parents, by="X", )
+load("../../../Genotype_data/GM_snps.Rdata")
+parents2 <- merge(GM_snps[,c("marker","rsID")],parents, by.x= "marker", by.y="X")
+musdom <- merge(musdom, parents2,by.x="X", by.y="marker", )
+
+
 #trait <- "class"
 for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   tax_table <- read.csv(paste0("../../../Phenotyping_27.02.2020/tables_core/",trait,"_tax_table_f2_core.csv" ))
@@ -138,8 +143,10 @@ dom <- ggplot(deduped.data, aes(x=dom.T)) +geom_histogram(colour="black", fill="
 
 add+dom + plot_annotation(title="All RNA", tag_levels = "A")
 ggsave("ALL_sig_snps-zscore.pdf")
-
-write.table(x = deduped.data, file="ALL_sig_snps_allP.txt")
+tt <- deduped.data %>% 
+  mutate(D.A=dom.T/add.T, MAF=(AA/n+AA/n+AB/n)/2,chr = as.numeric(as.character(chr)), pos=as.numeric(as.character(pos))) %>% 
+  arrange(chr, pos)
+write.table(x = tt, file="ALL_sig_snps_allP.txt")
 
 library(dplyr)
 ex <- deduped.data %>%
@@ -147,12 +154,94 @@ ex <- deduped.data %>%
   mutate(all_taxa = paste(tax, collapse = " | "))  %>% 
   add_count(marker, name="count") %>% 
   mutate(chr = as.numeric(as.character(chr)), pos=as.numeric(as.character(pos))) %>%
-  select(marker,chr, pos,A=A2,B=A1,mus,dom, AA,AB,BB,count, all_taxa, FSP3, FSP5, HAP1, HAP2, HOP3, HOP6, TUP3,TUP4) %>%  
+  dplyr::select(marker,chr, pos,A=A2,B=A1,mus,dom, AA,AB,BB,count, all_taxa, FSP3, FSP5, HAP1, HAP2, HOP3, HOP6, TUP3,TUP4) %>%  
   distinct() %>% 
   arrange(chr,pos)
 write.table(ex,"summary_table_DNA_markers_count.txt")  
 
 write.table(ex,"summary_table_RNA_markers_count.txt")  
+
+# Add closest genes to al snps
+library(VariantAnnotation)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene) # for annotation
+library(org.Mm.eg.db) 
+library(tidyr)
+
+
+
+
+
+input <- ex %>%
+  drop_na(chr) %>% 
+  mutate(chr=paste0("chr", chr), pos=pos*1e6)%>% 
+  dplyr::select(rsid=marker, chr, pos) 
+#input <- input[1:3,]
+input
+#         rsid  chr       pos
+# 1  rs3753344 chr1   1142150
+# 2 rs12191877 chr6  31252925
+# 3   rs881375 chr9 123652898
+
+target <- with(input,
+               GRanges( seqnames = Rle(chr),
+                        ranges   = IRanges(pos, end=pos, names=rsid),
+                        strand   = Rle(strand("*")) ) )
+target
+
+
+
+
+
+
+
+loc <- locateVariants(target, TxDb.Mmusculus.UCSC.mm10.knownGene, AllVariants())
+loc
+names(loc) <- NULL
+
+p_ids <- unlist(loc$PRECEDEID, use.names=FALSE) 
+exp_ranges <- rep(loc,  elementNROWS(loc$PRECEDEID))
+p_dist <- GenomicRanges::distance(exp_ranges, TxDb.Mmusculus.UCSC.mm10.knownGene, id=p_ids, type="gene")
+head(p_dist)
+exp_ranges$PRECEDE_DIST <- p_dist
+exp_ranges
+
+## Collapsed view of ranges, gene id and distance:
+loc$PRECEDE_DIST <- relist(p_dist, loc$PRECEDEID)
+loc
+
+
+f_ids <- unlist(loc$FOLLOWID, use.names=FALSE) 
+exp_ranges_f <- rep(loc,  elementNROWS(loc$FOLLOWID))
+
+f_dist <- GenomicRanges::nearest(exp_ranges_f, TxDb.Mmusculus.UCSC.mm10.knownGene, id=f_ids, type="gene")
+head(f_dist)
+exp_ranges_f$FOLLOWDIST <- f_dist
+exp_ranges_f
+
+## Collapsed view of ranges, gene id and distance:
+loc$FOLLOW_DIST <- relist(f_dist, loc$FOLLOWID)
+loc
+
+out <- as.data.frame(loc)
+out$names <- names(target)[ out$QUERYID ]
+out <- out[ , c("names", "seqnames", "start", "end", "LOCATION", "GENEID", "PRECEDEID", "FOLLOWID", "PRECEDE_DIST", "FOLLOW_DIST")]
+out <- unique(out)
+out
+
+Symbol2id <- as.list( org.Mm.egSYMBOL2EG )
+id2Symbol <- rep( names(Symbol2id), sapply(Symbol2id, length) )
+names(id2Symbol) <- unlist(Symbol2id)
+
+x <- unique( with(out, c(levels(as.factor(GENEID)), levels(as.factor(PRECEDEID)), levels(as.factor(FOLLOWID)))),levels(as.factor(PRECEDE_DIST)), levels(as.factor(FOLLOW_DIST)) )
+table( x %in% id2Symbol ) # good, all found
+
+out$GENESYMBOL <- id2Symbol[ as.character(out$GENEID) ]
+out$PRECEDESYMBOL <- id2Symbol[ as.character(out$PRECEDEID) ]
+out$FOLLOWSYMBOL <- id2Symbol[ as.character(out$FOLLOWID) ]
+out
+final_out <-merge(ex, out, by.x="rsID", by.y="names", all.x=T)
+write.csv(final_out, "markers_with_genes_DNA.csv")
+
 
 
 

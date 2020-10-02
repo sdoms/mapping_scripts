@@ -19,21 +19,30 @@
 mypalette <- c("#E2709A", "#CB4577", "#BD215B", "#970F42", "#75002B") # chr color palette
 
 
-gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", threshold=NA, hlight=NA, col=mypalette, title=""){
+gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", threshold=NA, hlight=NA, col=mypalette, title="", method){
   require(readr)
   require(ggrepel)
   require(ggplot2)
   require(dplyr)
   require(tidyr)
   require(RColorBrewer)
+  require(qvalue)
   #require(qvalue)
   # make the df 
   gwscan<- gwscan %>% drop_na(P)
   df <- data.frame(SNP = gwscan[,SNP],CHR=as.numeric(gwscan[,CHR]), BP=as.numeric(gwscan[,BP]) * 1e6, P=as.numeric(gwscan[,P]))
   df <- df[order(df$CHR),]
   
+  if (method=="bon"){
+    sig <- 0.05/nrow(df)
+    #sugg = 1/nrow(df) 
+  } else if (method =="fdr"){
+    #threshold
+    q <-qvalue(df$P)
+    sig <- (max(na.omit(q$pvalues[q$qvalues <=0.1])))
+  }
   
-  sig = 0.05/nrow(df) # significant threshold line
+  #sig = 0.05/nrow(df) # significant threshold line
   sugg = 1/nrow(df)  # suggestive threshold line
   if (is.na(threshold)){
       threshold <- sig
