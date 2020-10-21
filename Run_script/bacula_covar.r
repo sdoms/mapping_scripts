@@ -1,3 +1,7 @@
+###########################################################################################
+##  This script can accept one covariate that is added as a fixed effect in the models.  ##
+###########################################################################################
+
 setwd("/home/doms/glm")
 .libPaths("/home/doms/R/x86_64-pc-linux-gnu-library/3.5")
 
@@ -20,11 +24,9 @@ args <- commandArgs(TRUE)
 #DNAorRNA <- args[2]
 trait <- args[1]
 covar <- args[2]
-# if (length(args)<3) {
-#   # default output file
-#   args[3] = FALSE
-# }
-# transformation <- args[3]
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
 
 #source("kinship/make_gemma_kinship.R")
 
@@ -52,10 +54,18 @@ pheno <- pheno[indi_all, ]
 individuals <- as.character(rownames(pheno))
 geno <- geno[individuals %in% indi_all,]
 indi_all <- rownames(geno)
-# make kinship matrices
+
+##---------------------------------------------------------------
+##                2. Calculate kinship matrices                --
+##---------------------------------------------------------------
+
+
 #writeKinship("input/clean_f2", pheno,"kinship/", individuals)
 
 
+##---------------------------------------------------------------
+##                    3. Recoding genotypes                    --
+##---------------------------------------------------------------
 
 # recode from major allele count coding to -1(homo min), 0(hetero), 1(homo ref)
 add.mat <-ifelse(geno[,] == 0, 1, ifelse(geno[,] == 1, 0,  ifelse(geno[,] == 2, -1, NA)))
@@ -65,10 +75,9 @@ dom.mat <- ifelse(abs(geno[,]) == 2, 0, ifelse(geno[,] == 1, 1,  ifelse(geno[,] 
 rownames(dom.mat)<- rownames(add.mat)
 colnames(dom.mat)<- colnames(dom.mat)
 
-# if (transformation==TRUE){
-#   # Logit Transform 
-#   pheno[,trait] <- as.data.frame(sapply(pheno[,trait], function(x) inv.logit(x), USE.NAMES = T))
-# } 
+##----------------------------------------------------------------
+##             4. Selecting phenotype and covariate             --
+##----------------------------------------------------------------
 taxa2 <- pheno[,c(trait, covar)]
 
 
@@ -82,6 +91,10 @@ lmm.data$Row.names<- NULL
 
 individuals <-rownames(lmm.data)
 
+
+##----------------------------------------------------------------
+##                         5. Run model                         --
+##----------------------------------------------------------------
 
 # model
 gwasResults <- data.frame()

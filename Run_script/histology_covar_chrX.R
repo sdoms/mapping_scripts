@@ -1,3 +1,9 @@
+
+###############################################################################
+##  This script will run the model with one covariate for the X chromosome.  ##
+##                  Here we do not have a dominance effect.                  ##
+###############################################################################
+
 setwd("/home/doms/glm")
 .libPaths("/home/doms/R/x86_64-pc-linux-gnu-library/3.5")
 
@@ -23,10 +29,12 @@ if (length(args)>2){
   data_trans <- FALSE
 }
 
-# Parameters ####
-#trait_list <- c("tubule.area", "tubule.perimeter", "SSR","chao1", "shannon")
-#for (trait in trait_list){
-# Reading in data ####
+
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
+
+
 # Phenotypes ----------
 cat("Reading in phenotypes and covariates. \n")
 pheno <- read.csv("input/Phenotypes_histology_new.csv", sep=";", header=T)
@@ -64,7 +72,12 @@ indi_all <- rownames(geno)
 add.mat <-ifelse(geno[,] == 0, 1, ifelse(geno[,] == 2, -1, NA))
 
 
-  
+
+##----------------------------------------------------------------
+##                         2. Run model                         --
+##----------------------------------------------------------------
+
+
 
 cat("Running model for ", trait, ".\n")
   # model

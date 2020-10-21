@@ -1,3 +1,9 @@
+
+##################################################################
+##     This script will run the model for the X chromosome.     ##
+##            Here we do not have a dominance effect.           ##
+##################################################################
+
 setwd("/home/doms/glm")
 .libPaths("/home/doms/R/x86_64-pc-linux-gnu-library/3.5")
 
@@ -18,6 +24,13 @@ tx <- as.integer(args[1])
 # Parameters ####
 #DNAorRNA <- args[2]
 #trait <- args[3]
+
+
+
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
+
 
 cat("Reading in phenotypes and covariates. \n")
 pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
@@ -56,7 +69,12 @@ rownames(lmm.data)<- lmm.data$Row.names
 lmm.data$Row.names<- NULL
 individuals <-rownames(lmm.data)
 
-  
+
+##----------------------------------------------------------------
+##                    2. Load kinship matrix                    --
+##----------------------------------------------------------------
+
+
 kinship <- read.table("./kinship_RNA/kinship_chrX.cXX.txt")
 
 
@@ -69,6 +87,11 @@ sub<-colnames(gts)[colMeans(gts,na.rm=T)/2>0.025 & colMeans(gts,na.rm=T)/2<0.975
 gts<-gts[,sub]
 out<-data.frame(snps[sub,1:6],tax=NA,n=NA,AA=NA,AB=NA,BB=NA,add.Beta=NA,add.StdErr=NA,add.T=NA,P=NA)
 out$tax<-tax
+
+
+##----------------------------------------------------------------
+##                         3. Run model                         --
+##----------------------------------------------------------------
 
 
 

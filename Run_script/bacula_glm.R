@@ -1,3 +1,8 @@
+#########################################################################################################################
+##                                    Mapping script for bacula traits                                                 ##
+##                                 This script will run the association mapping model.                                 ##
+##  The model calculates a total P value and has fixed effect terms for the additive effect and the dominance effect.  ##
+#########################################################################################################################
 setwd("/home/doms/glm")
 .libPaths("/home/doms/R/x86_64-pc-linux-gnu-library/3.5")
 
@@ -20,9 +25,11 @@ tx <- as.integer(args[1])
 # trait <- args[1]
 
 
-#source("kinship/make_gemma_kinship.R")
 
-# Reading in data ####
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
+
 # Phenotypes ----------
 cat("Reading in phenotypes and covariates. \n")
 # pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
@@ -45,9 +52,17 @@ pheno <- pheno[indi_all, ]
 individuals <- as.character(rownames(pheno))
 geno <- geno[individuals,]
 indi_all <- rownames(geno)
-# make kinship matrices
-#writeKinship("input/clean_f2", pheno,"kinship/", individuals)
+##---------------------------------------------------------------
+##                2. Calculate kinship matrices                --
+##---------------------------------------------------------------
+# source("kinship/make_gemma_kinship.R")
+# only need to run this script once (uncomment next line)
+# writeKinship("input/clean_f2", pheno,"kinship/", individuals)
 
+
+##---------------------------------------------------------------
+##                    3. Recoding genotypes                    --
+##---------------------------------------------------------------
 
 
 # recode from major allele count coding to -1(homo min), 0(hetero), 1(homo ref)
@@ -59,7 +74,9 @@ rownames(dom.mat)<- rownames(add.mat)
 colnames(dom.mat)<- colnames(dom.mat)
 
 
-
+##----------------------------------------------------------------
+##                    4. Selecting phenotype                    --
+##----------------------------------------------------------------
 
 
 taxa2 <- pheno[tx]
@@ -76,21 +93,25 @@ lmm.data$Row.names<- NULL
 individuals <-rownames(lmm.data)
 
 
-# model
+
+##----------------------------------------------------------------
+##                         5. Run model                         --
+##----------------------------------------------------------------
 gwasResults <- data.frame()
 for (chr in 1:19){
   cat("Running model on chromosome ",chr, ".\n")
-    kinship <- read.table(paste0("./kinship_RNA/kinship_chr",chr,".cXX.txt"))
-  
-  
+  # read kinship matrix for chromosome
+  kinship <- read.table(paste0("./kinship_RNA/kinship_chr",chr,".cXX.txt"))
   kinship<- as.matrix(kinship)
   rownames(kinship)<- indi_all
   colnames(kinship)<-indi_all
-  #kinship <- kinship[individuals,individuals]
+
+  # select markers from chromosome
   marker_chr <- snps[which(snps$chr==chr),1]
   gts<-add.mat[individuals,marker_chr]
   sub<-colnames(gts)[colMeans(gts,na.rm=T)/2>0.025 & colMeans(gts,na.rm=T)/2<0.975 & is.na(colMeans(gts,na.rm=T))==F]
   gts<-gts[,sub]
+  # prepare output dataframe
   out<-data.frame(snps[sub,1:6],tax=NA,n=NA,AA=NA,AB=NA,BB=NA,add.Beta=NA,add.StdErr=NA,add.T=NA, dom.Beta=NA,dom.StdErr=NA, dom.T=NA,P=NA, add.P=NA, dom.P=NA)
   out$tax<-tax
   
@@ -101,7 +122,7 @@ for (chr in 1:19){
   null_model <- relmatLmer(tax ~  (1|id), df,relmat=list(id=kinship))
   size <- nrow(df)
   
-  
+  # Run model for each snp on chromosome
   system.time(f<-mclapply(as.list(sub), function(snp){
     df<-data.frame(lmm.data,ad=gts[,snp],dom=dom.mat[,snp],gt=geno[,snp])
     df<-df[is.na(df$ad)==F & is.na(df$tax)==F &is.na(df$gt)==F & is.na(df$dom)==F,]
@@ -113,6 +134,7 @@ for (chr in 1:19){
     names(res)<-c("n","AA","AB","BB","add.Beta","add.StdErr","add.T","dom.Beta", "dom.StdErr", "dom.T", "P", "add.P", "dom.P")
     
     return(res)},mc.cores=getOption("mc.cores", 20)))
+  # collect output data 
   out[,c("n","AA","AB","BB","add.Beta","add.StdErr","add.T","dom.Beta", "dom.StdErr","dom.T","P","add.P", "dom.P")]<-data.frame(do.call(rbind, f))
   
   # Add a column with the marker index.

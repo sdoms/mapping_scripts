@@ -1,3 +1,8 @@
+
+###########################################################################################
+##  This script can accept one covariate that is added as a fixed effect in the models.  ##
+###########################################################################################
+
 setwd("/home/doms/glm")
 .libPaths("/home/doms/R/x86_64-pc-linux-gnu-library/3.5")
 
@@ -28,7 +33,11 @@ transformation <- args[3]
 
 #source("kinship/make_gemma_kinship.R")
 
-# Reading in data ####
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
+
+
 # Phenotypes ----------
 cat("Reading in phenotypes and covariates. \n")
 pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
@@ -48,8 +57,19 @@ pheno <- pheno[indi_all, ]
 individuals <- as.character(rownames(pheno))
 geno <- geno[individuals,]
 indi_all <- rownames(geno)
-# make kinship matrices
+
+
+##---------------------------------------------------------------
+##                2. Calculate kinship matrices                --
+##---------------------------------------------------------------
+
+
 #writeKinship("input/clean_f2", pheno,"kinship/", individuals)
+
+
+##---------------------------------------------------------------
+##                    3. Recoding genotypes                    --
+##---------------------------------------------------------------
 
 
 
@@ -65,6 +85,13 @@ if (transformation==TRUE){
   # Logit Transform 
   pheno[,trait] <- as.data.frame(sapply(pheno[,trait], function(x) inv.logit(x), USE.NAMES = T))
 } 
+
+
+##----------------------------------------------------------------
+##             4. Selecting phenotype and covariate             --
+##----------------------------------------------------------------
+
+
 taxa2 <- pheno[,c(trait, covar)]
 
 
@@ -77,6 +104,11 @@ lmm.data$Row.names<- NULL
 
 
 individuals <-rownames(lmm.data)
+
+
+##----------------------------------------------------------------
+##                         5. Run model                         --
+##----------------------------------------------------------------
 
 
 # model

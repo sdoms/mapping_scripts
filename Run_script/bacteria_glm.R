@@ -1,3 +1,10 @@
+#########################################################################################################################
+##                                 Mapping script for bacterial abundance phenotypes                                   ##
+##                                 This script will run the association mapping model.                                 ##
+##  The model calculates a total P value and has fixed effect terms for the additive effect and the dominance effect.  ##
+#########################################################################################################################
+
+
 setwd("/home/doms/glm")
 .libPaths("/home/doms/R/x86_64-pc-linux-gnu-library/3.5")
 
@@ -19,10 +26,9 @@ tx <- as.integer(args[1])
 DNAorRNA <- args[2]
 trait <- args[3]
 
-
-#source("kinship/make_gemma_kinship.R")
-
-# Reading in data ####
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
 # Phenotypes ----------
 cat("Reading in phenotypes and covariates. \n")
 pheno <- read.csv("./input/Phenotypes_new.csv", sep=";", header=T)
@@ -50,10 +56,17 @@ load("input/clean_snps.Rdata")
 
 geno <- geno[individuals,]
 indi_all <- rownames(geno)
-# make kinship matrices
-#writeKinship("input/clean_f2", pheno,"kinship/", individuals)
+##---------------------------------------------------------------
+##                2. Calculate kinship matrices                --
+##---------------------------------------------------------------
+# source("kinship/make_gemma_kinship.R")
+# only need to run this script once (uncomment next line)
+# writeKinship("input/clean_f2", pheno,"kinship/", individuals)
 
 
+##---------------------------------------------------------------
+##                    3. Recoding genotypes                    --
+##---------------------------------------------------------------
 
 # recode from major allele count coding to -1(homo min), 0(hetero), 1(homo ref)
 add.mat <-ifelse(geno[,] == 0, 1, ifelse(geno[,] == 1, 0,  ifelse(geno[,] == 2, -1, NA)))
@@ -64,7 +77,9 @@ rownames(dom.mat)<- rownames(add.mat)
 colnames(dom.mat)<- colnames(dom.mat)
 
 
-
+##----------------------------------------------------------------
+##                    4. Selecting phenotype                    --
+##----------------------------------------------------------------
 
 
 taxa2 <- taxa[tx]
@@ -81,7 +96,12 @@ lmm.data$Row.names<- NULL
 individuals <-rownames(lmm.data)
 
 
+##----------------------------------------------------------------
+##                         5. Run model                         --
+##----------------------------------------------------------------
+
 # model
+
 gwasResults <- data.frame()
 for (chr in 1:19){
   cat("Running model on chromosome ",chr, ".\n")
@@ -109,7 +129,7 @@ for (chr in 1:19){
   null_model <- relmatLmer(tax ~ (1|mating.pair)+ (1|id), df,relmat=list(id=kinship))
   size <- nrow(df)
   
-  
+  # Run model for each snp on chromosome
   system.time(f<-mclapply(as.list(sub), function(snp){
     df<-data.frame(lmm.data,ad=gts[,snp],dom=dom.mat[,snp],gt=geno[,snp])
     df<-df[is.na(df$ad)==F & is.na(df$tax)==F,]

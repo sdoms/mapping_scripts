@@ -1,3 +1,9 @@
+
+##################################################################
+##     This script will run the model for the X chromosome.     ##
+##            Here we do not have a dominance effect.           ##
+##################################################################
+
 setwd("/home/doms/glm")
 .libPaths("/home/doms/R/x86_64-pc-linux-gnu-library/3.5")
 
@@ -18,6 +24,12 @@ tx <- as.integer(args[1])
 # Parameters ####
 DNAorRNA <- args[2]
 trait <- args[3]
+
+
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
+
 
 # Phenotypes ----------
 cat("Reading in phenotypes and covariates. \n")
@@ -44,6 +56,11 @@ colnames(geno)<- substr(colnames(geno),1 ,nchar(colnames(geno))-2)
 
 load("input/clean_snps.Rdata")
 
+##---------------------------------------------------------------
+##             2. Select markers from X chromosome             --
+##---------------------------------------------------------------
+
+
 marker_chr <- snps[which(snps$chr=="X"),1]
 geno <- geno[individuals,marker_chr]
 indi_all <- rownames(geno)
@@ -63,6 +80,13 @@ lmm.data <- merge(taxa2, pheno, by="row.names")
 rownames(lmm.data)<- lmm.data$Row.names
 lmm.data$Row.names<- NULL
 individuals <-rownames(lmm.data)
+
+
+##----------------------------------------------------------------
+##                    2. Load kinship matrix                    --
+##----------------------------------------------------------------
+
+
 if (DNAorRNA=="DNA"){
   kinship <- read.table("./kinship_DNA/kinship_chrX.cXX.txt")
 }else if (DNAorRNA=="RNA"){
@@ -80,6 +104,9 @@ out<-data.frame(snps[sub,1:6],tax=NA,n=NA,AA=NA,AB=NA,BB=NA,add.Beta=NA,add.StdE
 out$tax<-tax
 
 
+##----------------------------------------------------------------
+##                         3. Run model                         --
+##----------------------------------------------------------------
 
 #snp <- sub[1]
 df<-data.frame(lmm.data)
