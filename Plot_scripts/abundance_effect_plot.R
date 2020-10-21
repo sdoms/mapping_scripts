@@ -10,6 +10,7 @@ abundance.plot <- function(taxa, trait, DNAorRNA, marker){
   # load("~/Documents/PhD/Experiments/QTL_mapping_results/cleaning/clean_geno.Rdata")
   load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_geno.Rdata")
   load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_snps.Rdata")
+  theme_set(theme_bw())
   
   clean_geno <- as.data.frame(clean_geno)
   colnames(clean_geno) <- gsub(x = colnames(clean_geno), pattern = "\\/", replacement = ".")  
@@ -44,9 +45,10 @@ abundance.plot <- function(taxa, trait, DNAorRNA, marker){
   
   my_comp <- list(c(a, b),c(a, "H"), c(b, "H"))
   
-  tot_with_SV$marker<- factor(tot_with_SV$marker,
-                         levels = c(a,"H", b),ordered = TRUE)
-  fig<-ggplot(tot_with_SV, aes(x=marker, y=abundance)) + geom_boxplot(aes(fill=marker))+ stat_compare_means(comparisons = my_comp, label = "p.signif") + theme(legend.position = "none") + labs(x="Genotypes",y="Relative abundance")+ scale_fill_manual(values = cbbPalette)+scale_x_discrete(labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+ggtitle(paste0(taxa," abundance for marker ", marker))
+  fig<-ggplot(tot_with_SV, aes(x=marker, y=abundance)) + geom_boxplot(aes(fill=marker))+ 
+    stat_compare_means(comparisons = my_comp, label = "p.signif") + theme(legend.position = "none") + 
+    labs(x="Genotypes",y="Relative abundance")+ scale_fill_manual(values = cbbPalette)+
+    scale_x_discrete(limits=c(a, "H", b),labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+ggtitle(paste0(taxa," abundance for marker ", marker))
   fig <-fig + labs(caption = paste0("Mmm: ", mus_dom[,1], ", Mmd: ", mus_dom[,2]))
   stat_box_data <- function(x, upper_limit = max(tot_with_SV$abundance) * 1.75) {
     return( 
