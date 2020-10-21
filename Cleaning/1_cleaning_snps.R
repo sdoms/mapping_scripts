@@ -34,6 +34,8 @@ geno <- cbind(geno_merge_208_214, geno_207)
 # these are markers like "B6_01-074963079-S" which got corrupted to "B6_01.074963079.S"
 rownames(geno) <- gsub("\\.", "-", rownames(geno))
 
+save(geno, file="all_genotypes_all_samples.Rdata")
+
 parents <- subset(geno, iid %in% c("FSP3.02.G6.06.A.4F", "TUP3.02.G7.05.C.1M", "FSP3.02.G6.06.B.1F", "TUP3.02.G7.05.D.1M", "FSP5.01.G5.03.D.1F", "HAP1.01.G6.06.B.1M", "HAP1.01.G6.06.B.2F", "HOP3.02.G9.04.A.2M", "HAP2.01.G6.07M.B.2F", "FSP3.02.G6.06.B.2M", "HAP2.01.G6.07M.B.1F", "FSP3.02.G6.07.A.1M", "HOP3.02.G8.06.A.1F", "TUP4.02.G8.02.A.4M", "HAP2.01.G6.07M.B.1M", "HOP6.03.G7.02.C.1F", "HOP6.03.G7.05.B.1F", "HAP2.01.G6.07M.B.2M", "TUP3.02.G7.05.C.1F", "HOP6.03.G7.02.C.1M", "TUP3.02.G7.05.C.2F", "HOP6.03.G7.02.C.2M", "TUP4.02.G8.01.B.1F", "FSP5.01.G5.03.D.1M", "TUP4.02.G8.03.A.1F", "FSP5.01.G5.03.D.2M"), by="samples")
 save(parents, file="parents_all_snps_geno.RData")
 ## this command produces files 'sample.bed', 'sample.bim' and 'sample.fam'
