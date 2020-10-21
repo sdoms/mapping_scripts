@@ -27,8 +27,8 @@ tx <- as.integer(args[1])
 cat("Reading in phenotypes and covariates. \n")
 pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
 pheno <- pheno[1:327,]
-rownames(pheno)<-pheno$mouse_name
-pheno$id <- pheno$mouse_name
+rownames(pheno)<-pheno$Mouse_Name
+pheno$id <- pheno$Mouse_Name
 #individuals <- as.character(rownames(pheno))
 
 # Genotypes ------------
@@ -102,7 +102,7 @@ for (chr in 1:19){
   
   system.time(f<-mclapply(as.list(sub), function(snp){
     df<-data.frame(lmm.data,ad=gts[,snp],dom=dom.mat[,snp],gt=geno[,snp])
-    df<-df[is.na(df$ad)==F & is.na(df$tax)==F,]
+    df<-df[is.na(df$ad)==F & is.na(df$tax)==F &is.na(df$gt)==F & is.na(df$dom)==F,]
     if (nrow(df)!=size){
       null_model <- relmatLmer(tax ~  (1|id), df,relmat=list(id=kinship))
     }
@@ -119,7 +119,6 @@ for (chr in 1:19){
   #out$log10p <- -1 * log10(out$P)
   gwasResults <- rbind(gwasResults, out)
   dir.create(path=paste0("./out/",tax, "/"), showWarnings = F )
-  dir.create()
   saveRDS(out,paste0("./out/",tax, "/",tax, "_chr_",chr,"with_add_dom.rds"))
   head(out)
   # }

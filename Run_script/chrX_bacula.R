@@ -20,11 +20,14 @@ tx <- as.integer(args[1])
 #trait <- args[3]
 
 cat("Reading in phenotypes and covariates. \n")
-pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
-pheno <- pheno[1:327,]
-rownames(pheno)<-pheno$Mouse_Name
-pheno$id <- pheno$Mouse_Name
+# pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
+# pheno <- pheno[1:327,]
+# rownames(pheno)<-pheno$Mouse_Name
+# pheno$id <- pheno$Mouse_Name
 #individuals <- as.character(rownames(pheno))
+pheno <- read.csv("./input/BaculaPhenosG2sMap20200921.csv", sep=";", header=T)
+rownames(pheno) <- pheno$mouse_name
+pheno$id <- pheno$mouse_name
 
 # Genotypes ------------
 cat("Reading in genotypes. \n")
@@ -79,7 +82,7 @@ null_model <- relmatLmer(tax ~  (1|id), df,relmat=list(id=kinship))
 
 system.time(f<-mclapply(as.list(sub), function(snp){
   df<-data.frame(lmm.data,ad=gts[,snp],gt=geno[,snp])
-  df<-df[is.na(df$ad)==F & is.na(df$tax)==F,]
+  df<-df<-df[is.na(df$ad)==F & is.na(df$tax)==F &is.na(df$gt)==F,]
   #solves the NA problem
   if (nrow(df)!=size){
     null_model <- relmatLmer(tax ~  (1|id), df,relmat=list(id=kinship))
@@ -94,8 +97,8 @@ out[,c("n","AA","AB","BB","add.Beta","add.StdErr","add.T","P")]<-data.frame(do.c
 # Add a column with the marker index.
 n      <- nrow(out)
 out <- cbind(out,index = 1:n)
-
-saveRDS(out,paste0("./out/",tax,"/",tax, "_chrX.rds"))
+dir.create(path=paste0("./out/bacula/",tax, "/"), showWarnings = F )
+saveRDS(out,paste0("./out/bacula/",tax,"/",tax, "_chrX.rds"))
 
 
 

@@ -10,32 +10,29 @@ library(lme4)
 library(plyr)
 library(lmerTest)
 library(car)
-library(olsrr)
 #library(qqman)
 
 args <- commandArgs(TRUE)
 
-#tx <- as.integer(args[1])
+tx <- as.integer(args[1])
 # Parameters ####
 #DNAorRNA <- args[2]
-trait <- args[1]
-covar <- args[2]
-if (length(args)<3) {
-  # default output file
-  args[3] = FALSE
-}
-transformation <- args[3]
+# trait <- args[1]
+
 
 #source("kinship/make_gemma_kinship.R")
 
 # Reading in data ####
 # Phenotypes ----------
 cat("Reading in phenotypes and covariates. \n")
-pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
-rownames(pheno)<-pheno$Mouse_Name
-pheno$id <- pheno$Mouse_Name
+# pheno <- read.csv("./input/Phenotypes_histology_new.csv", sep=";", header=T)
+# pheno <- pheno[1:327,]
+# rownames(pheno)<-pheno$Mouse_Name
+# pheno$id <- pheno$Mouse_Name
 #individuals <- as.character(rownames(pheno))
-
+pheno <- read.csv("./input/BaculaPhenosG2sMap20200921.csv", sep=";", header=T)
+rownames(pheno) <- pheno$mouse_name
+pheno$id <- pheno$mouse_name
 # Genotypes ------------
 cat("Reading in genotypes. \n")
 geno<- BEDMatrix("input/clean_f2")
@@ -61,16 +58,16 @@ dom.mat <- ifelse(abs(geno[,]) == 2, 0, ifelse(geno[,] == 1, 1,  ifelse(geno[,] 
 rownames(dom.mat)<- rownames(add.mat)
 colnames(dom.mat)<- colnames(dom.mat)
 
-if (transformation==TRUE){
-  # Logit Transform 
-  pheno[,trait] <- as.data.frame(sapply(pheno[,trait], function(x) inv.logit(x), USE.NAMES = T))
-} 
-taxa2 <- pheno[,c(trait, covar)]
 
 
-cat("Running model for ", trait, " with ", covar, " as covariate.\n")
-names(taxa2)<-c("tax", "covar")
-tax <- trait 
+
+
+taxa2 <- pheno[tx]
+
+tax <- names(taxa2)
+cat("Running model for ", tax, ".\n")
+names(taxa2)<-"tax"
+
 lmm.data <- merge(taxa2, pheno, by="row.names")
 rownames(lmm.data)<- lmm.data$Row.names
 lmm.data$Row.names<- NULL
@@ -83,7 +80,7 @@ individuals <-rownames(lmm.data)
 gwasResults <- data.frame()
 for (chr in 1:19){
   cat("Running model on chromosome ",chr, ".\n")
-  kinship <- read.table(paste0("./kinship_RNA/kinship_chr",chr,".cXX.txt"))
+    kinship <- read.table(paste0("./kinship_RNA/kinship_chr",chr,".cXX.txt"))
   
   
   kinship<- as.matrix(kinship)
@@ -101,18 +98,18 @@ for (chr in 1:19){
   
   #snp <- sub[1]
   df<-data.frame(lmm.data)
-  null_model <- relmatLmer(tax ~  covar + (1|id), df,relmat=list(id=kinship))
+  null_model <- relmatLmer(tax ~  (1|id), df,relmat=list(id=kinship))
   size <- nrow(df)
-
+  
   
   system.time(f<-mclapply(as.list(sub), function(snp){
     df<-data.frame(lmm.data,ad=gts[,snp],dom=dom.mat[,snp],gt=geno[,snp])
-    df<-df[is.na(df$ad)==F & is.na(df$tax)==F & is.na(df$covar)==F& is.na(df$dom)==F & is.na(df$gt)==F,]
+    df<-df[is.na(df$ad)==F & is.na(df$tax)==F &is.na(df$gt)==F & is.na(df$dom)==F,]
     if (nrow(df)!=size){
-      null_model <- relmatLmer(tax ~  covar +   (1|id), df,relmat=list(id=kinship))
+      null_model <- relmatLmer(tax ~  (1|id), df,relmat=list(id=kinship))
     }
-    model <- relmatLmer(tax ~ ad+dom +  covar + (1|id), df,relmat=list(id=kinship))
-    res<-c(nrow(df),table(factor(df$ad,levels=c(-1,0,1))),tryCatch(summary(model)$coefficients[2,], error=function(x) return(rep(NA,3))),tryCatch(summary(model)$coefficients[3,], error=function(x) return(rep(NA,3))),tryCatch(anova(null_model,model)[2,8], error=function(x) return(NA)), tryCatch(Anova(model)[1:2,3],error=function(x) return(rep(NA, 2)) ))
+    model <- relmatLmer(tax ~ ad+dom + (1|id), df,relmat=list(id=kinship))
+    res<-c(nrow(df),table(factor(df$ad,levels=c(-1,0,1))),tryCatch(summary(model)$coefficients[2,], error=function(x) return(rep(NA,3))),tryCatch(summary(model)$coefficients[3,], error=function(x) return(rep(NA,3))),tryCatch(anova(null_model,model)[2,8], error=function(x) return(NA)), tryCatch(Anova(model)[,3],error=function(x) return(rep(NA, 2)) ))
     names(res)<-c("n","AA","AB","BB","add.Beta","add.StdErr","add.T","dom.Beta", "dom.StdErr", "dom.T", "P", "add.P", "dom.P")
     
     return(res)},mc.cores=getOption("mc.cores", 20)))
@@ -123,16 +120,15 @@ for (chr in 1:19){
   out <- cbind(out,index = 1:n)
   #out$log10p <- -1 * log10(out$P)
   gwasResults <- rbind(gwasResults, out)
-  dir.create(path=paste0("./out/",tax, "/"), showWarnings = F )
-
-  saveRDS(out,paste0("./out/",tax, "/",tax,"_with_covar_", covar,  "_chr_",chr,"with_add_dom.rds"))
+  dir.create(path=paste0("./out/bacula/",tax, "/"), showWarnings = F )
+  saveRDS(out,paste0("./out/bacula/",tax, "/",tax, "_chr_",chr,"with_add_dom.rds"))
   head(out)
   # }
   
   
   
 }
-saveRDS(out,paste0("./out/",tax, "/",tax,"_with_covar_", covar, "_with_add_dom.rds"))
+#saveRDS(out,paste0("./out/",DNAorRNA,"/",trait,"/",tax, "_with_add_dom.rds"))
 
 
 
