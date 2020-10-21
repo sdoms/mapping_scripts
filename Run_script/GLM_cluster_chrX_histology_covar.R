@@ -10,7 +10,7 @@ library(gtools)
 library(lme4)
 library(plyr)
 library(lmerTest)
-library(qqman)
+#library(qqman)
 
 args <- commandArgs(TRUE)
 
@@ -31,10 +31,10 @@ if (length(args)>2){
 cat("Reading in phenotypes and covariates. \n")
 pheno <- read.csv("input/Phenotypes_histology_new.csv", sep=";", header=T)
 pheno <- pheno[1:327,]
-rownames(pheno)<-pheno$mouse_name
-pheno$id <- pheno$mouse_name
+rownames(pheno)<-pheno$Mouse_Name
+pheno$id <- pheno$Mouse_Name
 
-individuals <- as.character(pheno$id)
+#individuals <- as.character(pheno$id)
 colnames(pheno)[colnames(pheno)==trait] <- "trait"
 colnames(pheno)[colnames(pheno)==covar] <- "covar"
 # transform counts
@@ -51,10 +51,15 @@ rownames(geno) <- gsub(x = rownames(geno), pattern = "\\/", replacement = ".")
 colnames(geno)<- substr(colnames(geno),1 ,nchar(colnames(geno))-2)
 
 load("input/clean_snps.Rdata")
-
 marker_chr <- snps[which(snps$chr=="X"),1]
-geno <- geno[individuals,marker_chr]
 indi_all <- rownames(geno)
+
+pheno <- pheno[indi_all, ]
+individuals <- as.character(rownames(pheno))
+geno <- geno[individuals,marker_chr]
+
+indi_all <- rownames(geno)
+
 # recode from major allele count coding to -1(homo min), 0(hetero), 1(homo ref)
 add.mat <-ifelse(geno[,] == 0, 1, ifelse(geno[,] == 2, -1, NA))
 
@@ -101,7 +106,7 @@ cat("Running model for ", trait, ".\n")
   n      <- nrow(out)
   out <- cbind(out,index = 1:n)
   
-  saveRDS(out,paste0("./out/",trait,"with", covar, "_chrX.rds"))
+  saveRDS(out,paste0("./out/",trait,"/", trait, "_with_covar_", covar, "_chrX.rds"))
   
 
 
