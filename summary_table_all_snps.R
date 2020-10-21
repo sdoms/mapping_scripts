@@ -76,7 +76,7 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   
 } 
 
-###### all snps taxa ###
+###### all snps taxa #####
 
 #musdom <- read.csv("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/consensus_mus_dom.csv", sep=";")
 #trait <- "class"
@@ -149,7 +149,7 @@ tt <- deduped.data %>%
 write.table(x = tt, file="ALL_sig_snps_allP.txt")
 
 library(dplyr)
-ex <- deduped.data %>%
+ex <- tt %>%
   group_by(marker) %>%
   mutate(all_taxa = paste(tax, collapse = " | "))  %>% 
   add_count(marker, name="count") %>% 
@@ -213,36 +213,71 @@ loc
 f_ids <- unlist(loc$FOLLOWID, use.names=FALSE) 
 exp_ranges_f <- rep(loc,  elementNROWS(loc$FOLLOWID))
 
-f_dist <- GenomicRanges::nearest(exp_ranges_f, TxDb.Mmusculus.UCSC.mm10.knownGene, id=f_ids, type="gene")
+f_dist <- GenomicRanges::distance(exp_ranges_f, TxDb.Mmusculus.UCSC.mm10.knownGene, id=f_ids, type="gene")
 head(f_dist)
-exp_ranges_f$FOLLOWDIST <- f_dist
+exp_ranges_f$FOLLOW_DIST <- f_dist
 exp_ranges_f
 
 ## Collapsed view of ranges, gene id and distance:
 loc$FOLLOW_DIST <- relist(f_dist, loc$FOLLOWID)
 loc
 
+# find closest
+# find closest
+loc$PRECEDEID_place <-lapply(loc$PRECEDE_DIST, function(x) which.min(x))
+loc$PRECEDEID_place <- as.numeric(as.character(loc$PRECEDEID_place))
+
+#loc$PRECEDEID_closest <- lapply(loc$PRECEDEID, function(x) x[unlist(loc$PRECEDEID_place)])
+
+loc$FOLLOWID_place <-lapply(loc$FOLLOW_DIST, function(x) which.min(x))
+loc$FOLLOWID_place <- as.numeric(as.character(loc$FOLLOWID_place))
+
+#out$FOLLOWID_closest <- apply(out, 1, function(x) dplyr::nth(x[14],unlist(x[20]), default=NULL))
+
+
 out <- as.data.frame(loc)
 out$names <- names(target)[ out$QUERYID ]
-out <- out[ , c("names", "seqnames", "start", "end", "LOCATION", "GENEID", "PRECEDEID", "FOLLOWID", "PRECEDE_DIST", "FOLLOW_DIST")]
+
+precede_ID <- data.frame(out$PRECEDEID)
+colnames(precede_ID)<- "ID"
+precede_ID$place <- out$PRECEDEID_place
+for (x in 1:nrow(precede_ID)){
+  n <- precede_ID[x,"place"]
+  precede_ID[x,"closest"] <- as.vector(precede_ID[x,1])[[1]][n]
+}
+
+follow_ID <- data.frame(out$FOLLOWID)
+colnames(follow_ID)<- "ID"
+follow_ID$place <- out$FOLLOWID_place
+for (x in 1:nrow(follow_ID)){
+  n <- follow_ID[x,"place"]
+  follow_ID[x,"closest"] <- as.vector(follow_ID[x,1])[[1]][n]
+}
+
+
+out <- out[ , c("names", "seqnames", "start", "end", "LOCATION", "GENEID")]
+out <- cbind(out, precede_ID$closest)
+out <- cbind(out, follow_ID$closest)
+
 out <- unique(out)
 out
 
+colnames(out)<- c("names", "seqnames", "start", "end", "LOCATION", "GENEID", "PRECEDEID", "FOLLOWID")
 Symbol2id <- as.list( org.Mm.egSYMBOL2EG )
 id2Symbol <- rep( names(Symbol2id), sapply(Symbol2id, length) )
 names(id2Symbol) <- unlist(Symbol2id)
 
-x <- unique( with(out, c(levels(as.factor(GENEID)), levels(as.factor(PRECEDEID)), levels(as.factor(FOLLOWID)))),levels(as.factor(PRECEDE_DIST)), levels(as.factor(FOLLOW_DIST)) )
-table( x %in% id2Symbol ) # good, all found
+x <- unique( with(out, c(levels(as.factor(GENEID)), levels(as.factor(PRECEDEID)), levels(as.factor(FOLLOWID)))))
+table( x %in% names(id2Symbol)) # good, all found
 
 out$GENESYMBOL <- id2Symbol[ as.character(out$GENEID) ]
 out$PRECEDESYMBOL <- id2Symbol[ as.character(out$PRECEDEID) ]
 out$FOLLOWSYMBOL <- id2Symbol[ as.character(out$FOLLOWID) ]
 out
-final_out <-merge(ex, out, by.x="rsID", by.y="names", all.x=T)
-write.csv(final_out, "markers_with_genes_DNA.csv")
+final_out <-merge(ex, out, by.x="marker", by.y="names", all.x=T)
+write.csv(final_out, "markers_with_genes_DNA.csv", row.names = F)
 
-
+write.csv(final_out, "markers_with_genes_RNA.csv", row.names = F)
 
 
 
