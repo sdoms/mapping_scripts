@@ -1,11 +1,14 @@
-# This script will clean the genotype date using Argyle and PLINK
-
-# in R
+#######################################################################
+##                          Cleaning SNPS:                           ##
+##  This script will clean the genotype data using Argyle and PLINK  ##
+#######################################################################
 library(argyle)
 setwd("~/Documents/PhD/Experiments/QTL_mapping_results/cleaning2")
 
-# DATA IMPORT ----
-# LOAD snps data
+##----------------------------------------------------------------
+##                        1. Data import                        --
+##----------------------------------------------------------------
+# Load snps data
 load("../Genotype_data/GM_snps.Rdata")
 
 #remove snps with biallelic=FALSE
@@ -44,6 +47,10 @@ f2<- subset(geno, fid=="HZ", by="samples")
 
 write.plink(f2, "hybrid_f2")
 
+##----------------------------------------------------------------
+##               2. Missingness and MAF frequency               --
+##----------------------------------------------------------------
+
 # Investigate missingness per individual and per SNP and make histograms.
 system("plink --bfile hybrid_f2 --missing --allow-extra-chr --chr 1-19, X,Y,M")    
 # output: plink.imiss and plink.lmiss, these files show respectively the proportion of missing SNPs per individual and the proportion of missing individuals per SNP.
@@ -65,8 +72,10 @@ source("MAF_check.R")
 system("plink --bfile hybrid_f2_3 --maf 0.05 --make-bed --out hybrid_f2_4")
 
 
-####################################################
-### Step 4 ###
+
+##---------------------------------------------------------------
+##                      3. Hardy-Weinberg                      --
+##---------------------------------------------------------------
 
 # Delete SNPs which are not in Hardy-Weinberg equilibrium (HWE).
 # Check the distribution of HWE p-values of all SNPs.
@@ -81,7 +90,10 @@ source("hwe.R")
 system("plink --bfile hybrid_f2_4 --hwe 1e-10 midp --hwe-all --make-bed --out hybrid_f2_5")
 
 
-# # filter on ld
+
+##---------------------------------------------------------------
+##                       4. LD filtering                       --
+##---------------------------------------------------------------
 
 system("plink --bfile hybrid_f2_5 --indep-pairwise 5 1 0.9") 
 # window size of 5 SNPs
@@ -93,7 +105,11 @@ system("plink --bfile hybrid_f2_5 --extract plink.prune.in --make-bed --out hybr
 # extract the markers that are NOT in linkage disequilibrium
 # this keeps about 47 000 markers
 
-############## Back to R #################
+
+##---------------------------------------------------------------
+##                     5. Load back into R                     --
+##---------------------------------------------------------------
+
 # back to argyle ####
 clean_geno <-read.plink("hybrids_pruned")
 
@@ -108,7 +124,10 @@ snps <- GM_snps[rownames(clean_geno),]
 save(clean_geno, file= "clean_geno.Rdata")
 save(snps, file="clean_snps.Rdata")
 
-# LD blocks 
+
+##----------------------------------------------------------------
+##                    6. Calculate LD blocks                    --
+##----------------------------------------------------------------
 # with cleaned data
 system("plink --bfile clean_f2 --blocks no-pheno-req")
 

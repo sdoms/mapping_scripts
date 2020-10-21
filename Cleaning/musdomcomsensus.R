@@ -1,3 +1,10 @@
+
+##########################################################################
+##            Consensus genotypes for musculus and domesticus           ##
+##  using genotyping data from 20 domesticus mice and 20 musculus mice  ##
+##########################################################################
+
+
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/")
 library(argyle)
 library(qtl2convert)
@@ -27,7 +34,10 @@ geno_mus <- musdom[,mus]
 geno_dom <- musdom[,dom]
 
 
-#finding the consensus sequence along mus and dom
+##---------------------------------------------------------------
+##                     Consensus genotypes                     --
+##---------------------------------------------------------------
+
 consensus <-matrix(ncol=2, nrow=nrow(musdom))
 colnames(consensus) <- c("mus", "dom")
 rownames(consensus)<- rownames(musdom)
@@ -38,6 +48,11 @@ consensus[,2]<- qtl2convert::find_consensus_geno(as.matrix(geno_dom), na.strings
 #library(SOfun)
 #cons <-makemeNA(as.data.frame(consensus), "[ACGTH]", FALSE)
 write.csv(consensus, file="consensus_mus_dom.csv")
+
+
+##----------------------------------------------------------------
+##                 Calculate allele frequencies                 --
+##----------------------------------------------------------------
 
 
 allele_freq <- data.frame(consensus)

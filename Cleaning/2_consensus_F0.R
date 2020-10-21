@@ -1,10 +1,21 @@
-# in R
+
+###############################################################################################
+##                               Calculate consensus genotypes                               ##
+##  This script will calculate the consensus genotype for each of the ancestral mouse lines  ##
+###############################################################################################
+
+
 library(argyle)
 library(qtl2convert)
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/")
 
 
-# cleaning PART 2: This script will create the founder genotype files needed for RQTL2
+
+##----------------------------------------------------------------
+##                       For cleaned SNPs                       --
+##----------------------------------------------------------------
+
+
 load("clean_snps.Rdata")
 load("parents_all_snps_geno.RData")
 parents <- as.matrix(as.data.frame(parents))
@@ -41,7 +52,11 @@ for(i in unique(codes))
 save(reduced_geno, file="consensus_F0_clean.Rdata")
 write.csv(reduced_geno, file="consensus_F0_clean.csv")
 
-### for all snps ####
+
+##----------------------------------------------------------------
+##                         For all SNPs                         --
+##----------------------------------------------------------------
+
 geno <- as.data.frame(parents)
 #rm(parents)
 rownames(geno)<- geno$marker
