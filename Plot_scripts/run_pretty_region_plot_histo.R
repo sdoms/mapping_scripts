@@ -1,3 +1,13 @@
+
+#################################################################################
+##                  Plot region script and write results table                 ##
+##   This script will make a locuszoom-like plot for the significant regions   ##
+##            using Bonferroni as the default significance threshold           ##
+##      It plots the significant SNPs within their confidance interval,        ##
+##  which is calculted through finding snps in high LD with peak SNP (LD>0.9)  ##
+#################################################################################
+
+
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Sterility/")
 
 run_pretty_region <- function(directory,trait, Xtrue=T, method="bon"){

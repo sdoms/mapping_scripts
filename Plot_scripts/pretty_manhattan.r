@@ -27,7 +27,7 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", thres
   require(tidyr)
   require(RColorBrewer)
   require(qvalue)
-  #require(qvalue)
+
   # make the df 
   gwscan<- gwscan %>% drop_na(P)
   df <- data.frame(SNP = gwscan[,SNP],CHR=as.numeric(gwscan[,CHR]), BP=as.numeric(gwscan[,BP]) * 1e6, P=as.numeric(gwscan[,P]))
@@ -58,7 +58,7 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", thres
     
     # Calculate cumulative position of each chromosome
     mutate(tot=cumsum(chr_len)-chr_len) %>%
-    select(-chr_len) %>%
+    dplyr::select(-chr_len) %>%
     
     # Add this info to the initial dataset
     left_join(df, ., by=c("CHR"="CHR")) %>%

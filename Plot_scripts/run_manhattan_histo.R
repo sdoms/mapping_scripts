@@ -1,5 +1,6 @@
 run_manhattan <- function(trait, Xtrue=TRUE, covar ="none", method="bon"){
-  require(tidyr)
+  require(tidyverse)
+  require(dplyr)
   source('~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Plot_scripts/pretty_manhattan.r')
   dir.create(path="./manhattan_plots", showWarnings = F)
   outputdir <- "./manhattan_plots/"
