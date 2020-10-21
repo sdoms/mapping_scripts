@@ -1,4 +1,4 @@
-plot.pretty.region <- function(gws, Xtrue, P="P", title=""){
+plot.pretty.region <- function(gws, Xtrue, P="P", title="", method="bon"){
   require(biomaRt)
   require(stringr)
   require(forcats)
@@ -40,7 +40,17 @@ plot.pretty.region <- function(gws, Xtrue, P="P", title=""){
 
   # Bonferonni threshold 
   # threshold <- -log10(0.05/nrow(gwscan))
-  threshold <- -log10((0.05/nrow(gwscan))/118.2177)
+  if (method=="bon"){
+    threshold <- -log10(0.05/nrow(gwscan))
+    #sugg = 1/nrow(df) 
+  } else if (method =="fdr"){
+    #threshold
+    q <-qvalue(gwscan[,P])
+    threshold <- -log10((max(na.omit(q$pvalues[q$qvalues <=0.1]))))
+  } else if (method=="SW"){
+    threshold <- -log10((0.05/nrow(gwscan))/118.2177)
+  }
+  
   
   #Initializing parameters 
   intervals <- c()
@@ -255,7 +265,7 @@ plot.pretty.region <- function(gws, Xtrue, P="P", title=""){
           p1b <- p1 + xlab("") + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + xlim(plot.range) +geom_vline(xintercept = min_pos, linetype="dotted") + geom_vline(xintercept = max_pos, linetype="dotted") +theme(legend.direction = "vertical", legend.box = "horizontal")
           
           p1b + p2 + plot_layout(ncol = 1, heights = c(6, 6)) 
-          ggsave(paste0("../figures/", gws, "-", P,"-chr", chr, "_bin",  j ,"_region_plot.pdf"), width = 9, height =6)
+          ggsave(paste0("../figures/", gws, "-", P,"-chr", chr, "_bin",  j ,"_", method,"_region_plot.pdf"), width = 9, height =6)
           
           pos_max_snp <- significant_snps[max_snp, "pos"] *1e6
           if ((dim(out.bm.gene)[1] == 0)){
@@ -292,8 +302,8 @@ plot.pretty.region <- function(gws, Xtrue, P="P", title=""){
     }
     cat("Ready with chromosome", chr, ".\n")
   }
-  write(intervals, file=paste0("../results/",gws,"-", P,"_intervals.txt"))
-  write(min_max_positions, file=paste0("../results/",gws, "-", P,"_min_max_positions.txt"))
+  write(intervals, file=paste0("../results/",gws,"-", P,"_", method,"_intervals.txt"))
+  write(min_max_positions, file=paste0("../results/",gws, "-", P,"_", method,"_min_max_positions.txt"))
   #write.table(out, file=paste0("../results/",gws, "-", P,"_results.txt"))
   return(out)
 }
