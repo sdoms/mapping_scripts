@@ -16,6 +16,7 @@ run_manhattan <- function(trait, Xtrue=T){
   chrom_range <- c(1:19)
   colnames(tax_table)<- tolower(colnames(tax_table))
   if (trait =="otu"){
+    tax_table <- tax_table[, c(3, 5:10)]
     colnames(tax_table) <- c("otu", "kingdom", "phylum", "class", "order", "family", "genus")
     tax_table<- tax_table[-7,] # remove SV9 for RNA 
   }
