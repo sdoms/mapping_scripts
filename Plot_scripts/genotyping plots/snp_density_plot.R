@@ -22,16 +22,19 @@ for (chr in goodChrOrder){
   res$chr <- chr
   output <- rbind(output,res)
 }
+mean_freq <- mean(output$Freq, na.rm=T)
 
 output <- output %>% filter(Freq != 0)
+
 chrSizes <- na.omit(chrSizes)
 library(viridis)
 snp_plot <- ggplot()+
 geom_segment(data = chrSizes,
              aes(x = chr, xend = chr, y = 0, yend = chr_len),
-             lineend = "round", color = "#f9f9f9", size = 5) + 
+             lineend = "round", color = "#DEE1E3", size = 5) + 
+  
   geom_segment(data=output, 
              aes(x=chr, xend=chr, y=start, yend=end, color=Freq), size=4)+
-  coord_flip() + scale_color_viridis(option="magma", direction = -1) + labs(y="Position (Mb)", x= "Chromosome", color="SNP Count") +theme_classic()
-snp_plot
+  coord_flip() + scale_color_viridis(option="magma", direction = -1) + labs(y="Position (Mb)", x= "Chromosome", color="SNP Count") +theme_test()
+snp_plot + scale_x_discrete(limits=goodChrOrder)
 ggsave("Results/Plots/SNP_density_plot_without_grid.pdf")

@@ -269,14 +269,14 @@ plot.pretty.region <- function(gws, Xtrue, P="P", title="", method="bon"){
           ggsave(paste0("../figures/", gws, "-", P,"-chr", chr, "_bin",  j ,"_", method,"_region_plot.pdf"), width = 9, height =6)
           
           pos_max_snp <- significant_snps[max_snp, "pos"] *1e6
-          if (is.na(out.bm.gene)){
+          if ((dim(out.bm.gene)[1] == 0)){
             absol_diff <- matrix(c(abs(out.bm.genes.region$start_position-pos_max_snp), 
                                    abs(out.bm.genes.region$end_position-pos_max_snp)), ncol=2, byrow = F)
             closest_gene <- out.bm.genes.region[which(absol_diff==min(absol_diff), arr.ind = T)[1],]
             
-          } else if ((dim(out.bm.gene)[1] == 0)){
+          } else if (is.na(out.bm.gene)){
             absol_diff <- matrix(c(abs(out.bm.genes.region$start_position-pos_max_snp), 
-                                     abs(out.bm.genes.region$end_position-pos_max_snp)), ncol=2, byrow = F)
+                                   abs(out.bm.genes.region$end_position-pos_max_snp)), ncol=2, byrow = F)
             closest_gene <- out.bm.genes.region[which(absol_diff==min(absol_diff), arr.ind = T)[1],]
             
           } else {

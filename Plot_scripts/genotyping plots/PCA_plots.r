@@ -86,8 +86,8 @@ plot(pc, screeplot = T)
 pc_cor <- merge(fam, pc[,c(1,7:11)], by="iid")
 pc_cor$fid <- as.factor(pc_cor$fid)
 
-
-
+vars_explained <- attr(pc,"explained")
+names(vars_explained) <- c("PC1", "PC2", "PC3", "PC4", "PC5")
 library(ggplot2)
 library(ggsci)
 
@@ -107,7 +107,7 @@ colpal22 <- c('#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', 
 shapes <- c(0,2,15,1,10,21,13,24)
 
 #PC1 en PC2
-ggplot(pc_cor)+ geom_point(aes(x=PC1, y=PC2, color=fid)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)
+ggplot(pc_cor)+ geom_point(aes(x=PC1, y=PC2, color=fid)) + labs(x="PC1", y="PC2", color="") + theme_test()+scale_color_d3()
 ggsave("PCA_PC1_PC2_hybrids_vs_payseur_all_snps.pdf")
 
 
@@ -124,6 +124,9 @@ pc_cor$site[370:439]<- sites$Site
 sites <- as.character(pc_cor[which(is.na(pc_cor$site)),"fid"])
 pc_cor[which(is.na(pc_cor$site)),"site"] <-sites
 
+K <- 1:5
+names_PC <- paste0("PC", K)
+
 pc_cor <- pc_cor %>% 
   mutate(subsp=ifelse(fid=="HZ","hyb",
                       ifelse(fid=="HZ_F2","hyb",
@@ -132,59 +135,92 @@ pc_cor <- pc_cor %>%
                                                                                                ifelse(fid=="CB", "dom", 
                                                                                                       ifelse(fid=="MC","dom", ifelse(fid=="HZ_rep", "hyb",ifelse(fid=="HZ_F0", "hyb", NA)))))))))
 write.csv(pc_cor, "PCA_val_all_snps.csv")
+write.csv(rbind(names_PC,attr(pc, "explained")),file="variance_explained_all_snps.csv")
 
-ggplot(pc_cor)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_colour_manual(values = colpal26)
-ggsave("PCA_all_site_all_snps.pdf")
-ggplot(pc_cor)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)
+ggplot(pc_cor)+ geom_point(aes(x=PC1, y=PC2, color=fid,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_test()+scale_colour_d3()+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[2] ]), "%)"))
+ggsave("PCA_all_site_all_snps_fid.pdf")
+ggplot(pc_cor)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1) +
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_subsp_all_snps.pdf")
 #PC2 en PC3
 ggplot(pc_cor)+ geom_point(aes(x=PC2, y=PC3, color=site, fill=site,shape=fid)) + labs(x="PC2", y="PC3", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[3] ]), "%)"))
 ggsave("PCA_PC2_PC3_site_all_snps.pdf")
 
 #PC3 en PC4
 ggplot(pc_cor)+ geom_point(aes(x=PC3, y=PC4, color=site, fill=site,shape=fid)) + labs(x="PC3", y="PC4", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[3] ]), "%)")) + 
+  ylab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[4] ]), "%)"))
 ggsave("PCA_PC3_PC4_site_all_snps.pdf")
 
 #PC4 en PC5
 ggplot(pc_cor)+ geom_point(aes(x=PC4, y=PC5, color=site, fill=site,shape=fid)) + labs(x="PC4", y="PC5", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26) +
+  xlab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[4] ]), "%)")) + 
+  ylab(paste0("PC5 (", sprintf("%.1f", 100*attr(pc, "explained")[ K[5] ]), "%)"))
 ggsave("PCA_PC4_PC5_site_all_snps.pdf")
+
 
 # only autosomes
 
 geno_auto <- autosomes(all_geno)
 
 pc_auto <- pca(geno_auto, K=5)
+write.csv(rbind(names_PC,attr(pc_auto, "explained")),file="variance_explained_all_snps_autosomes.csv")
 
 pc_cor_auto <- pc_cor %>% 
   select(iid, site, sex, fid, subsp) %>% 
   mutate(pc_auto[7:11])
 write.csv(pc_cor_auto, "PCA_val_all_snps_autosomes.csv")
-
+pc_cor_auto<-read.csv("PCA_val_all_snps_autosomes.csv")
 #PC1 en PC2
-ggplot(pc_cor_auto)+ geom_point(aes(x=PC1, y=PC2, color=fid)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)
+auto_pc1 <-ggplot(pc_cor_auto)+ geom_point(aes(x=PC1, y=PC2, color=fid, shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_test()+scale_color_d3() +
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[2] ]), "%)"))
+auto_pc1
 ggsave("PCA_PC1_PC2_hybrids_vs_payseur_all_snps_autosome.pdf")
 
-ggplot(pc_cor_auto)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_colour_manual(values = colpal26)
+ggplot(pc_cor_auto)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_test()+
+  scale_colour_manual(values = colpal26)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_site_all_snps_autosome.pdf")
-ggplot(pc_cor_auto)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)
+ggplot(pc_cor_auto)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_subsp_all_snps_autosome.pdf")
 #PC2 en PC3
+auto_pc2 <-ggplot(pc_cor_auto)+ geom_point(aes(x=PC2, y=PC3, color=fid, shape=subsp), size=3, alpha=.7) + labs(x="PC2", y="PC3", color="") + theme_few()+scale_color_d3(palette = "category20c")+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[3] ]), "%)"))
+auto_pc2 
 ggplot(pc_cor_auto)+ geom_point(aes(x=PC2, y=PC3, color=site, fill=site,shape=fid)) + labs(x="PC2", y="PC3", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[3] ]), "%)"))
 ggsave("PCA_PC2_PC3_site_all_snps_autosome.pdf")
 
 #PC3 en PC4
 ggplot(pc_cor_auto)+ geom_point(aes(x=PC3, y=PC4, color=site, fill=site,shape=fid)) + labs(x="PC3", y="PC4", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[3] ]), "%)")) + 
+  ylab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[4] ]), "%)"))
 ggsave("PCA_PC3_PC4_site_all_snps_autosome.pdf")
 
 #PC4 en PC5
 ggplot(pc_cor_auto)+ geom_point(aes(x=PC4, y=PC5, color=site, fill=site,shape=fid)) + labs(x="PC4", y="PC5", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[4] ]), "%)")) + 
+  ylab(paste0("PC5 (", sprintf("%.1f", 100*attr(pc_auto, "explained")[ K[5] ]), "%)"))
 ggsave("PCA_PC4_PC5_site_all_snps_autosome.pdf")
+
+
 
 # only autosomes
 
@@ -196,28 +232,46 @@ pc_cor_X <- pc_cor %>%
   select(iid, site, sex, fid, subsp) %>% 
   mutate(pc_X[7:11])
 write.csv(pc_cor_X, "PCA_val_all_snps_Xchrom.csv")
+write.csv(rbind(names_PC,attr(pc_X, "explained")),file="variance_explained_all_snps_Xchrom.csv")
 
 #PC1 en PC2
-ggplot(pc_cor_X)+ geom_point(aes(x=PC1, y=PC2, color=fid)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)
+ggplot(pc_cor_X)+ geom_point(aes(x=PC1, y=PC2, color=fid, shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_PC1_PC2_hybrids_vs_payseur_all_snps_Xchrom.pdf")
 
-ggplot(pc_cor_X)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_colour_manual(values = colpal26)
+ggplot(pc_cor_X)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_colour_manual(values = colpal26)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_site_all_snps_Xchrom.pdf")
-ggplot(pc_cor_X)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)
+ggplot(pc_cor_X)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_subsp_all_snps_Xchrom.pdf")
 #PC2 en PC3
 ggplot(pc_cor_X)+ geom_point(aes(x=PC2, y=PC3, color=site, fill=site,shape=fid)) + labs(x="PC2", y="PC3", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[3] ]), "%)"))
 ggsave("PCA_PC2_PC3_site_all_snps_Xchrom.pdf")
 
+#PC1 en PC2
+ggplot(pc_cor_X)+ geom_point(aes(x=PC2, y=PC3, color=fid, shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_test()+scale_color_manual(values=tron_p2)+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[3] ]), "%)"))
+ggsave("PCA_PC2_PC3_hybrids_vs_payseur_all_snps_Xchrom.pdf")
 #PC3 en PC4
 ggplot(pc_cor_X)+ geom_point(aes(x=PC3, y=PC4, color=site, fill=site,shape=fid)) + labs(x="PC3", y="PC4", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_test()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[3] ]), "%)")) + 
+  ylab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[4] ]), "%)"))
 ggsave("PCA_PC3_PC4_site_all_snps_Xchrom.pdf")
 
 #PC4 en PC5
 ggplot(pc_cor_X)+ geom_point(aes(x=PC4, y=PC5, color=site, fill=site,shape=fid)) + labs(x="PC4", y="PC5", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[4] ]), "%)")) + 
+  ylab(paste0("PC5 (", sprintf("%.1f", 100*attr(pc_X, "explained")[ K[5] ]), "%)"))
 ggsave("PCA_PC4_PC5_site_all_snps_Xchrom.pdf")
 
 
@@ -236,30 +290,60 @@ pc_cor_auto_clean <- pc_cor %>%
   select(iid, site, sex, fid, subsp) %>% 
   mutate(pc_auto_clean[7:11])
 write.csv(pc_cor_auto_clean, "PCA_val_clean_snps_autosomes.csv")
+write.csv(rbind(names_PC,attr(pc_auto_clean, "explained")),file="variance_explained_clean_snps_autosomes.csv")
 
 #PC1 en PC2
-ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC1, y=PC2, color=fid)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)
+plot_pc1_pc2_auto <-ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC1, y=PC2, color=fid, shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_test()+scale_color_manual(values=tron_p2)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[2] ]), "%)"))
+plot_pc1_pc2_auto
 ggsave("PCA_PC1_PC2_hybrids_vs_payseur_clean_snps_autosome.pdf")
 
-ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_colour_manual(values = colpal26)
+ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + 
+  theme_test()+scale_colour_manual(values = colpal26)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_site_clean_snps_autosome.pdf")
-ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)
+ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_test() +scale_colour_manual(values = colpal1)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_subsp_clean_snps_autosome.pdf")
 #PC2 en PC3
-ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC2, y=PC3, color=site, fill=site,shape=fid)) + labs(x="PC2", y="PC3", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+plot_pc2_pc3_auto <-ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC2, y=PC3, color=site, fill=site,shape=fid)) + labs(x="PC2", y="PC3", color="", fill="", shape="") + 
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26) +
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[3] ]), "%)"))
+plot_pc2_pc3_auto
 ggsave("PCA_PC2_PC3_site_clean_snps_autosome.pdf")
 
+plot_pc2_pc3_auto <-ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC2, y=PC3, color=fid, shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_test()+scale_color_manual(values=tron_p2)+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[3] ]), "%)"))
+plot_pc2_pc3_auto
+ggsave("PCA_PC2_PC3_hybrids_vs_payseur_clean_snps_autosome.pdf")
 #PC3 en PC4
 ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC3, y=PC4, color=site, fill=site,shape=fid)) + labs(x="PC3", y="PC4", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[3] ]), "%)")) + 
+  ylab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[4] ]), "%)"))
 ggsave("PCA_PC3_PC4_site_clean_snps_autosome.pdf")
 
 #PC4 en PC5
 ggplot(pc_cor_auto_clean)+ geom_point(aes(x=PC4, y=PC5, color=site, fill=site,shape=fid)) + labs(x="PC4", y="PC5", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[4] ]), "%)")) + 
+  ylab(paste0("PC5 (", sprintf("%.1f", 100*attr(pc_auto_clean, "explained")[ K[5] ]), "%)"))
 ggsave("PCA_PC4_PC5_site_clean_snps_autosome.pdf")
 
+scree_clean_auto<-data.frame(PC=names_PC,variance_explained=attr(pc_auto_clean, "explained")) %>%
+  ggplot(aes(x=PC,y=variance_explained, group=1))+
+  geom_point(size=4)+
+  geom_line()+
+  labs(title="Scree plot: PCA on scaled data")+
+  theme_test()+
+  geom_text(aes(label=round(variance_explained,4)), vjust=-1, size=3.5)
+scree_clean_auto
+ggsave("scree_clean_snps_autosome.pdf")
 # only autosomes
 
 
@@ -269,26 +353,65 @@ pc_cor_X_clean <- pc_cor %>%
   select(iid, site, sex, fid, subsp) %>% 
   mutate(pc_X_clean[7:11])
 write.csv(pc_cor_X_clean, "PCA_val_clean_snps_Xchrom.csv")
+write.csv(rbind(names_PC,attr(pc_X_clean, "explained")),file="variance_explained_clean_snps_Xchrom.csv")
 
 #PC1 en PC2
-ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC1, y=PC2, color=fid)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)
+plot_pc1_pc2_X <-ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC1, y=PC2, color=fid, shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[2] ]), "%)"))
+plot_pc1_pc2_X
 ggsave("PCA_PC1_PC2_hybrids_vs_payseur_clean_snps_Xchrom.pdf")
 
-ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_colour_manual(values = colpal26)
+ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC1, y=PC2, color=site,shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_colour_manual(values = colpal26)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_site_clean_snps_Xchrom.pdf")
-ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)
+ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC1, y=PC2, color=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw() +scale_colour_manual(values = colpal1)+
+  xlab(paste0("PC1 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[1] ]), "%)")) + 
+  ylab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[2] ]), "%)"))
 ggsave("PCA_all_subsp_clean_snps_Xchrom.pdf")
 #PC2 en PC3
 ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC2, y=PC3, color=site, fill=site,shape=fid)) + labs(x="PC2", y="PC3", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[3] ]), "%)"))
 ggsave("PCA_PC2_PC3_site_clean_snps_Xchrom.pdf")
+
+plot_pc2_pc3_X <-ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC2, y=PC3, color=fid, shape=subsp)) + labs(x="PC1", y="PC2", color="") + theme_bw()+scale_color_manual(values=tron_p2)+
+  xlab(paste0("PC2 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[2] ]), "%)")) + 
+  ylab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[3] ]), "%)"))
+plot_pc2_pc3_X
+ggsave("PCA_PC2_PC3_hybrids_vs_payseur_clean_snps_Xchrom.pdf")
 
 #PC3 en PC4
 ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC3, y=PC4, color=site, fill=site,shape=fid)) + labs(x="PC3", y="PC4", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC3 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[3] ]), "%)")) + 
+  ylab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[4] ]), "%)"))
 ggsave("PCA_PC3_PC4_site_clean_snps_Xchrom.pdf")
 
 #PC4 en PC5
 ggplot(pc_cor_X_clean)+ geom_point(aes(x=PC4, y=PC5, color=site, fill=site,shape=fid)) + labs(x="PC4", y="PC5", color="", fill="", shape="") + 
-  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)
+  theme_bw()+scale_color_manual(values=colpal26)+scale_shape_manual(values=shapes) +scale_fill_manual(values=colpal26)+
+  xlab(paste0("PC4 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[4] ]), "%)")) + 
+  ylab(paste0("PC5 (", sprintf("%.1f", 100*attr(pc_X_clean, "explained")[ K[5] ]), "%)"))
 ggsave("PCA_PC4_PC5_site_clean_snps_Xchrom.pdf")
+
+
+# screee 
+scree_clean_X<-data.frame(PC=names_PC,variance_explained=attr(pc_X_clean, "explained")) %>%
+  ggplot(aes(x=PC,y=variance_explained, group=1))+
+  geom_point(size=4)+
+  geom_line()+
+  labs(title="Scree plot: PCA on scaled data")+
+  theme_test()+
+  geom_text(aes(label=round(variance_explained,4)), vjust=-1, size=3.5)
+scree_clean_X
+ggsave("scree_clean_snps_X.pdf")
+# only autosomes
+library(patchwork)
+s<-scree_clean_auto +scree_clean_X
+p2<- plot_pc2_pc3_auto+plot_pc2_pc3_X
+p1<- plot_pc1_pc2_auto+plot_pc1_pc2_X
+p1/p2/s +plot_layout(guides="collect")+plot_annotation(tag_levels = "A")
+ggsave("all_PCA_scree_together.pdf")
