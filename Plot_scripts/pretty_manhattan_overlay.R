@@ -66,8 +66,8 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P",  hlig
     
     # Add highlight and annotation information
     mutate( is_highlight=ifelse(SNP %in% hlight, "yes", "no")) %>%
-    # mutate( is_highlight=ifelse(P <sugg & P > sig, "yes", "no")) %>%
-    mutate( is_annotate=ifelse(P < sugg, "yes", "no"))
+    mutate( is_annotate=ifelse(P < sig, "yes", "no")) %>% 
+    mutate(is_sugg = ifelse(P<sugg, "yes", "no"))
   
   # get chromosome center positions for x-axis
   axisdf <- df.tmp %>% group_by(CHR) %>% summarize(center=( max(BPcum) + min(BPcum) ) / 2 )
@@ -97,10 +97,12 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P",  hlig
     #geom_label_repel(data=df.tmp[df.tmp$is_annotate=="yes",], aes(label=as.factor(SNP), alpha=0.7), size=5, force=1.3) +
     
     # highlight significant points 
-    geom_point(data=subset(df.tmp, is_annotate=="yes"), color="#709ae2", size=1) +
-    geom_point(data=subset(df.tmp, is_highlight=="yes"), color="#9ae270", size=1) +
+    # highlight significant points 
+    geom_point(data=subset(df.tmp, is_sugg=="yes"), color="#F6DD66", size=2) +
+    geom_point(data=subset(df.tmp, is_annotate=="yes"), color="#70e27f", size=2) +
+    geom_point(data=subset(df.tmp, is_highlight=="yes"), color="#9ae270", size=2) +
     coord_cartesian(clip = 'off')+
-    # Custom the theme:
+
     theme_bw(base_size = 12) +
     theme( 
       plot.title = element_text(hjust = 0.5),

@@ -46,6 +46,10 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", thres
   sugg = 1/nrow(df)  # suggestive threshold line
   if (is.na(threshold)){
       threshold <- sig
+      sugg = 1/nrow(df)  # suggestive threshold line
+  } else{
+      sugg=0.05/nrow(df)
+
     }
 
 
@@ -69,14 +73,15 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", thres
     
     # Add highlight and annotation information
     mutate( is_highlight=ifelse(SNP %in% hlight, "yes", "no")) %>%
-    mutate( is_annotate=ifelse(P < threshold, "yes", "no"))
+    mutate( is_annotate=ifelse(P < threshold, "yes", "no")) %>% 
+    mutate(is_sugg = ifelse(P<sugg, "yes", "no"))
   
   # get chromosome center positions for x-axis
   axisdf <- df.tmp %>% group_by(CHR) %>% summarize(center=( max(BPcum) + min(BPcum) ) / 2 )
   
   ggplot(df.tmp, aes(x=BPcum, y=-log10(P))) +
     # Show all points
-    geom_point(aes(color=as.factor(CHR)), alpha=0.8, size=2) +
+    geom_point(aes(color=as.factor(CHR)), alpha=0.8, size=1.5) +
     scale_color_manual(values = rep(col, 22 )) +
     
     # custom X axis:
@@ -88,7 +93,7 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", thres
     labs(x = "Chromosome") +
     
     # add genome-wide sig and sugg lines
-    geom_hline(yintercept = -log10(sig)) +
+    geom_hline(yintercept = -log10(threshold)) +
     geom_hline(yintercept = -log10(sugg), linetype="dashed") +
     
     # Add highlighted points
@@ -99,7 +104,8 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P", thres
     #geom_label_repel(data=df.tmp[df.tmp$is_annotate=="yes",], aes(label=as.factor(SNP), alpha=0.7), size=5, force=1.3) +
     
     # highlight significant points 
-    geom_point(data=subset(df.tmp, is_annotate=="yes"), color="#F6DD66", size=2) +
+    geom_point(data=subset(df.tmp, is_sugg=="yes"), color="#F6DD66", size=2) +
+    geom_point(data=subset(df.tmp, is_annotate=="yes"), color="#70e27f", size=2) +
     geom_point(data=subset(df.tmp, is_highlight=="yes"), color="blue", size=2) +
     coord_cartesian(clip = 'off')+
     # Custom the theme:
