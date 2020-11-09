@@ -198,3 +198,12 @@ run_pretty_region("P_Bacteroidetes")
 run_pretty_region("P_Deferribacteres") 
 run_pretty_region("P_Firmicutes") 
 run_pretty_region("P_Proteobacteria") 
+
+# alpha
+
+setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/alpha/")
+setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/alpha/")
+run_pretty_region("chao1")
+run_pretty_region("shannon")
+
+

@@ -20,13 +20,13 @@ run_pretty_region <- function(directory,trait, Xtrue=T, method="bon"){
   total_out1 <- rbind(out_P, out_add.P)
   total_out2 <- rbind(total_out1, out_dom.P)
   write.table(total_out2, file=paste0("../results/",trait,"_results.txt"))
- setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Sterility/")
+  setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Sterility/")
   #setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacula/")
 }
 
 run_pretty_region("./apo_per_tubule/", "apo_per_tubule")
 run_pretty_region("./arb_per_tubule/", "arb_per_tubule")
-run_pretty_region("./body_weight/", "body_weight_with_covar_body_length")
+run_pretty_region("./body_weight/", "body_weight_with_covar_body_length") # to do, but too much
 run_pretty_region("./combined_testis_weight/", "combined_testis_weight_with_covar_body_weight")
 run_pretty_region("./deg_per_tubule/", "deg_per_tubule")
 run_pretty_region("./exf_per_tubule/", "exf_per_tubule")
@@ -44,7 +44,7 @@ run_pretty_region("./vac_per_tubule/", "vac_per_tubule")
 
 run_pretty_region("./apo_per_tubule/", "apo_per_tubule", method="fdr")
 run_pretty_region("./arb_per_tubule/", "arb_per_tubule", method="fdr")
-run_pretty_region("./body_weight/", "body_weight_with_covar_body_length", method="fdr")
+run_pretty_region("./body_weight/", "body_weight_with_covar_body_length", method="fdr") # to do, but too much
 run_pretty_region("./combined_testis_weight/", "combined_testis_weight_with_covar_body_weight", method="fdr")
 run_pretty_region("./deg_per_tubule/", "deg_per_tubule", method="fdr")
 run_pretty_region("./exf_per_tubule/", "exf_per_tubule", method="fdr")
@@ -52,11 +52,14 @@ run_pretty_region("./mgc_per_tubule/", "mgc_per_tubule", method="fdr")
 run_pretty_region("./relative_testis_weight/", "relative_testis_weight", method="fdr")
 run_pretty_region("./sperm_count/", "sperm_count", method="fdr")
 run_pretty_region("./sperm_count/", "sperm_count_with_covar_combined_testis_weight", method="fdr")
-run_pretty_region("./spermatids_per_perimeter/", "spermatids_per_perimeter", method="fdr")
+# run_pretty_region("./spermatids_per_perimeter/", "spermatids_per_perimeter", method="fdr") # too many
 run_pretty_region("./spermatids_per_perimeter/", "spermatids_per_perimeter_with_covar_spermatocytes_per_perimeter", method="fdr")
 run_pretty_region("./spermatocytes_per_perimeter/", "spermatocytes_per_perimeter", method="fdr")
 run_pretty_region("./tubule_area/", "tubule_area", method="fdr")
 run_pretty_region("./vac_per_tubule/", "vac_per_tubule", method="fdr")
+run_pretty_region("./bmi/", "bmi", method="fdr")
+run_pretty_region("./body_length/", "body_length", method="fdr")
+run_pretty_region("./tail_length_no_outliers/", "tail_length_no_outliers", method="fdr")
 
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacula/")
 run_pretty_region("bac_PC01/", "bac_PC01")
@@ -78,9 +81,6 @@ run_pretty_region("bac2d_length/", "bac2d_length_with_covar_body_length")
 run_pretty_region("bac2d_shaft_width/", "bac2d_shaft_width_with_covar_body_length")
 run_pretty_region("bac_surf_area/", "bac_surf_area_with_covar_body_length")
 run_pretty_region("bac_vol/", "bac_vol_with_covar_body_length")
-
-
-
 
 
 

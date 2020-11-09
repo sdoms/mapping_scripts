@@ -7,6 +7,7 @@ plot.pretty.region <- function(gws, Xtrue, P="P", title="", method="bon"){
   require(plyr)
   require(patchwork)
   require(tidyverse)
+  require(qvalue)
 
   
   
