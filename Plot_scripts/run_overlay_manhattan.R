@@ -12,7 +12,7 @@ run_manhattan <- function(trait, Xtrue=T){
   
   
   #gws <- "C_Bacilli"
-  Xtrue <- TRUE
+  #Xtrue <- TRUE
   chrom_range <- c(1:19)
   colnames(tax_table)<- tolower(colnames(tax_table))
   if (trait =="otu"){
@@ -76,7 +76,7 @@ run_manhattan <- function(trait, Xtrue=T){
     mutate(mindomP = min(c_across(domP_cols), na.rm = T)) %>%  
     select(marker=marker...1, chr, pos,minP, minaddP, mindomP )
   
-                                               ######
+                                               
   dir.create(path="./overlay_manhattan_plots", showWarnings = F)
   outputdir <- "./overlay_manhattan_plots/"
   

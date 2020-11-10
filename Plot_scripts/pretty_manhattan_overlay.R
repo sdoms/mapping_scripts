@@ -98,9 +98,9 @@ gg.manhattan <- function(gwscan, SNP="marker", CHR="chr", BP="pos", P="P",  hlig
     
     # highlight significant points 
     # highlight significant points 
-    geom_point(data=subset(df.tmp, is_sugg=="yes"), color="#F6DD66", size=2) +
-    geom_point(data=subset(df.tmp, is_annotate=="yes"), color="#70e27f", size=2) +
-    geom_point(data=subset(df.tmp, is_highlight=="yes"), color="#9ae270", size=2) +
+    geom_point(data=subset(df.tmp, is_sugg=="yes"), color="#F6DD66", size=1.5) +
+    geom_point(data=subset(df.tmp, is_annotate=="yes"), color="#70e27f", size=1.5) +
+    geom_point(data=subset(df.tmp, is_highlight=="yes"), color="#9ae270", size=1.5) +
     coord_cartesian(clip = 'off')+
 
     theme_bw(base_size = 12) +
