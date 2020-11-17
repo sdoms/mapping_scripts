@@ -12,16 +12,17 @@ aa <- c("DNA", "RNA")
 all_analyses <- c("phylum", "class", "order", "family",  "genus", "otu")
 
 #gemma <- "~/Documents/PhD/Experiments/QTL_mapping/Old_code/GEMMA/bin/gemma"
-gemma <- "/Users/doms/miniconda3/bin/gemma"
+gemma <-"/usr/local/bin/gemma"
 
 for (DNAorRNA in aa){
-  #DNAorRNA <-"DNA"
-  for (analysis in all_analyses){
+  DNAorRNA <-"DNA"
+  #for (analysis in all_analyses){
 # parameters -----
-  #analysis <-"otu"
+  analysis <-"otu"
     load("../../Cleaning_snps/clean_snps.Rdata")
     map <- snps
-    covar_file <- read.covar("../../Phenotypes_histology_new.csv")
+    covar_file <-  read_delim("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotypes_histology_new.csv", 
+                              ";", escape_double = FALSE, trim_ws = TRUE)
     #rownames(covar_file) <- covar_file$mouse_name
 cat("Initiating Analysis ",analysis,".\n",sep="")
 
@@ -59,7 +60,7 @@ indi <- colnames(F2)
 taxa <- taxa[rownames(taxa) %in% indi,]
 # select the individuals where we have phenotype data for
 ind <- rownames(taxa)
-covar_file <- covar_file[covar_file$id %in% ind,]
+covar_file <- covar_file[covar_file$Mouse_Name %in% ind,]
 
 #choose what phenotype to analyse and what to use as covariate(s)
 all_covars <- colnames(covar_file)
@@ -89,7 +90,7 @@ write.gemma.map("map.txt", map)
 all_pve <- data.frame()
 
 if (analysis=="otu"&DNAorRNA=="RNA"){
-  all_taxa<- all_taxa[-7]
+  all_taxa<- all_taxa[-8]
 }
 
 scans        <- vector("list",length(all_taxa))
@@ -109,8 +110,10 @@ for (trait in all_taxa) {
   out      <- scan("output/result.log.txt",
                   what = "character",sep = " ",quiet = TRUE)
   pve<- out[which(out == "pve") + 7]
+  se <- out[which(out == "se(pve)") + 6]
 
   all_pve[trait,1]<- pve
+  all_pve[trait,2]<- se
   
   scans[[trait]] <-read.gemma.assoc("output/result.assoc.txt")
 }
@@ -121,5 +124,5 @@ write.table(all_pve, file=paste0("pve_", DNAorRNA, "_",analysis, ".txt" ))
 save(scans,file=paste0("output/gwscan_", analysis, ".rdata" ))
 
 
-}
+#}
 }
