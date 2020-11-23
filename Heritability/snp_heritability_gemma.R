@@ -9,16 +9,16 @@ source("~/Documents/PhD/Experiments/QTL_mapping/Old_code/GEMMA/plotting_function
 source("~/Documents/PhD/Experiments/QTL_mapping/Old_code/GEMMA/function_for_gemma.r")
 
 aa <- c("DNA", "RNA")
-all_analyses <- c("phylum", "class", "order", "family",  "genus", "otu")
+all_analyses <- c("phylum", "class", "order", "family",  "genus")
 
 #gemma <- "~/Documents/PhD/Experiments/QTL_mapping/Old_code/GEMMA/bin/gemma"
 gemma <-"/usr/local/bin/gemma"
 
 for (DNAorRNA in aa){
-  DNAorRNA <-"DNA"
-  #for (analysis in all_analyses){
+  #DNAorRNA <-"DNA"
+  for (analysis in all_analyses){
 # parameters -----
-  analysis <-"otu"
+  #analysis <-"otu"
     load("../../Cleaning_snps/clean_snps.Rdata")
     map <- snps
     covar_file <-  read_delim("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotypes_histology_new.csv", 
@@ -124,5 +124,5 @@ write.table(all_pve, file=paste0("pve_", DNAorRNA, "_",analysis, ".txt" ))
 save(scans,file=paste0("output/gwscan_", analysis, ".rdata" ))
 
 
-#}
+}
 }
