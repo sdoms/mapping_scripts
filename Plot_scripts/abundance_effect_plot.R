@@ -10,7 +10,7 @@ abundance.plot <- function(taxa, trait, DNAorRNA, marker){
   # load("~/Documents/PhD/Experiments/QTL_mapping_results/cleaning/clean_geno.Rdata")
   load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_geno.Rdata")
   load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_snps.Rdata")
-  theme_set(theme_bw())
+  theme_set(theme_test())
   
   clean_geno <- as.data.frame(clean_geno)
   colnames(clean_geno) <- gsub(x = colnames(clean_geno), pattern = "\\/", replacement = ".")  
@@ -48,7 +48,8 @@ abundance.plot <- function(taxa, trait, DNAorRNA, marker){
   fig<-ggplot(tot_with_SV, aes(x=marker, y=abundance)) + geom_boxplot(aes(fill=marker))+ 
     stat_compare_means(comparisons = my_comp, label = "p.signif") + theme(legend.position = "none") + 
     labs(x="Genotypes",y="Relative abundance")+ scale_fill_manual(values = cbbPalette)+
-    scale_x_discrete(limits=c(a, "H", b),labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+ggtitle(paste0(taxa," abundance for marker ", marker))
+    scale_x_discrete(limits=c(a, "H", b),labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+
+    ggtitle(paste0(taxa," abundance for marker ", marker))
   fig <-fig + labs(caption = paste0("Mmm: ", mus_dom[,1], ", Mmd: ", mus_dom[,2]))
   stat_box_data <- function(x, upper_limit = max(tot_with_SV$abundance) * 1.75) {
     return( 
@@ -57,8 +58,6 @@ abundance.plot <- function(taxa, trait, DNAorRNA, marker){
         label = paste('count =', 
                       format(length(x), big.mark = ",", decimal.mark = ".", scientific = FALSE), 
                       '\n',
-                      'median =', 
-                      format(round(median(x), 4), big.mark = ",", decimal.mark = ".", scientific = FALSE),'\n',
                       'mean =', 
                       format(round(mean(x), 4), big.mark = ",", decimal.mark = ".", scientific = FALSE))
       )
@@ -75,9 +74,14 @@ abundance.plot <- function(taxa, trait, DNAorRNA, marker){
   #annotate_figure(fig3, fig.lab = "GG: domesticus, AA: musculus", fig.lab.pos = "bottom.right", fig.lab.size = 12)
   ggsave(file=paste0(taxa,"_marker_", marker,"_",DNAorRNA, ".pdf"), plot=fig)
   
-  fig2<-ggplot(tot_with_SV, aes(x=marker, y=log_counts)) + geom_boxplot(aes(fill=marker))+ stat_compare_means(comparisons = my_comp, label = "p.signif") + theme(legend.position = "none") + labs(x="Genotypes",y="Log transformed abundance")+ scale_fill_manual(values = cbbPalette)+scale_x_discrete(labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+ggtitle(paste0(taxa," abundance for marker ", marker))
+  fig2<-ggplot(tot_with_SV, aes(x=marker, y=log_counts)) + geom_boxplot(aes(fill=marker))+ 
+    stat_compare_means(comparisons = my_comp, label = "p.signif")  +theme(legend.position = "none") +
+    labs(x="Genotypes",y="Log10 transformed absolute abundance")+ scale_fill_manual(values = cbbPalette)+
+    scale_x_discrete(limits=c(a, "H", b),labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+
+    ggtitle(paste0(taxa," abundance for marker ", marker)) 
   #annotate_figure(fig3, fig.lab = "GG: domesticus, AA: musculus", fig.lab.pos = "bottom.right", fig.lab.size = 12)
   ggsave(file=paste0(taxa,"_marker_", marker,"_",DNAorRNA, "log.pdf"), plot=fig2)
+  return(fig)
 }
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Plots/Effect_plots/")
 abundance.plot("SV1", "otu", "RNA", "UNC11806630")
@@ -96,3 +100,13 @@ abundance.plot("G_Acetatifactor", "genus", "DNA", "UNCHS006872")
 abundance.plot("SV142", "otu", "RNA", "UNCHS006872")
 abundance.plot("SV29", "otu", "DNA", "UNC24166386")
 abundance.plot("SV17", "otu", "RNA", "UNC1045279")
+
+
+# UNCHS039968
+abundance.plot("SV197", "otu", "DNA", "UNCHS039968")
+abundance.plot("SV243", "otu", "DNA", "UNCHS039968")
+abundance.plot("SV139", "otu", "DNA", "UNCHS039968")
+abundance.plot("SV61", "otu", "DNA", "UNCHS039968")
+abundance.plot("SV173", "otu", "DNA", "UNCHS039968")
+abundance.plot("SV79", "otu", "DNA", "UNCHS039968")
+
