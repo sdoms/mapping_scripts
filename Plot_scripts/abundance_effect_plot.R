@@ -6,7 +6,7 @@ abundance.plot <- function(taxa, trait, DNAorRNA, marker){
   require(cowplot)
   require(ggpubr)
   
-  cbbPalette <- c("#1f78b4", "#b2df8a", "#a6cee3","#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", '#6a3d9a', "#ffff99", "#b15928", "#40e0d0", "#ffff00", "#ee82ee", "#fb8072", "#191970", "#fdb462", "#CBD4D4", "#fccde5", "#d9d9d9", "#bc80bd", "#32cd32", "#ffed6f", "lightcoral" )
+  cbbPalette <- c("#1f78b4",  "#a6cee3","#b2df8a","#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", '#6a3d9a', "#ffff99", "#b15928", "#40e0d0", "#ffff00", "#ee82ee", "#fb8072", "#191970", "#fdb462", "#CBD4D4", "#fccde5", "#d9d9d9", "#bc80bd", "#32cd32", "#ffed6f", "lightcoral" )
   # load("~/Documents/PhD/Experiments/QTL_mapping_results/cleaning/clean_geno.Rdata")
   load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_geno.Rdata")
   load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_snps.Rdata")
@@ -109,4 +109,30 @@ abundance.plot("SV139", "otu", "DNA", "UNCHS039968")
 abundance.plot("SV61", "otu", "DNA", "UNCHS039968")
 abundance.plot("SV173", "otu", "DNA", "UNCHS039968")
 abundance.plot("SV79", "otu", "DNA", "UNCHS039968")
+abundance.plot("SV246", "otu", "DNA", "UNCHS039968")
+abundance.plot("G_Anaerostipes", "genus", "DNA", "UNCHS039968")
+abundance.plot("unclassified_F_Prevotellaceae", "genus", "DNA", "UNCHS039968")
+abundance.plot("G_Roseburia", "genus", "DNA", "UNCHS039968")
+
+abundance.plot("SV197", "otu", "RNA", "UNCHS039968")
+abundance.plot("SV243", "otu", "RNA", "UNCHS039968")
+abundance.plot("SV139", "otu", "RNA", "UNCHS039968")
+abundance.plot("SV61", "otu", "RNA", "UNCHS039968")
+abundance.plot("SV173", "otu", "RNA", "UNCHS039968")
+abundance.plot("SV79", "otu", "RNA", "UNCHS039968")
+abundance.plot("SV246", "otu", "RNA", "UNCHS039968")
+abundance.plot("G_Anaerostipes", "genus", "RNA", "UNCHS039968")
+abundance.plot("unclassified_F_Prevotellaceae", "genus", "RNA", "UNCHS039968")
+abundance.plot("G_Roseburia", "genus", "RNA", "UNCHS039968")
+
+
+# UNC11687867
+abundance.plot("G_Lactobacillus", "genus", "RNA", "UNC11687867")
+
+# UNC11691749
+abundance.plot("G_Lactobacillus", "genus", "RNA", "UNC11691749")
+
+
+
+
 

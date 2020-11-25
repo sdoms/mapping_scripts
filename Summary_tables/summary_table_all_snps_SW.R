@@ -2,6 +2,10 @@ setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DN
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/")
 library(ggplot2)
 library(patchwork)
+library(VariantAnnotation)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene) # for annotation
+library(org.Mm.eg.db) 
+library(tidyverse)
 musdom <- read.csv("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/allele_freq_consensus_mus_dom.csv", sep=",")
 musdom$dd_frew <- NULL
 load("../../../Cleaning_snps/consensus_F0_all.Rdata")
@@ -175,10 +179,7 @@ write.table(ex,paste0(outputdir,"summary_table_RNA_markers_count.txt"))
 ##                            with the closest genes to the marker                            ##
 ################################################################################################
 # Add closest genes to al snps
-library(VariantAnnotation)
-library(TxDb.Mmusculus.UCSC.mm10.knownGene) # for annotation
-library(org.Mm.eg.db) 
-library(tidyverse)
+
 input <- ex %>%
   drop_na(chr) %>% 
   mutate(chr=paste0("chr", chr), pos=pos*1e6)%>% 
@@ -299,19 +300,28 @@ write.csv(ex_dist, paste0(outputdir,"markers_with_genes_RNA_SW.csv"), row.names 
 
 
 final_out_rna<- ex_dist
-final_out_dna <- read.csv(paste0("../DNA/", outputdir, "markers_with_genes_DNA_SW.csv"))
+final_out_rna<- read.csv(paste0("../RNA/", outputdir, "markers_with_genes_RNA_SW.csv"), sep = ";")
+final_out_dna <- read.csv(paste0("../DNA/", outputdir, "markers_with_genes_DNA_SW.csv"), sep = ";")
 
 final_out_dna$DNA_RNA <- "DNA"
 final_out_rna$DNA_RNA <- "RNA"
 
 all_final <- rbind(final_out_dna, final_out_rna)
 
+tot_count <-all_final %>%
+  group_by(marker, DNA_RNA) %>% 
+  mutate(taxa=ifelse(DNA_RNA == "DNA", paste("DNA:", all_taxa), paste("RNA:", all_taxa))) %>% 
+  group_by(marker) %>% 
+  summarise(total_count = sum(count))
 ex_all <- all_final %>%
   group_by(marker, DNA_RNA) %>% 
   mutate(taxa=ifelse(DNA_RNA == "DNA", paste("DNA:", all_taxa), paste("RNA:", all_taxa))) %>% 
   group_by(marker) %>% 
   mutate(all_taxa = paste(taxa, collapse = " | ")) %>% 
-  dplyr::select(-c(taxa, DNA_RNA,AA,AB, BB, count)) %>% 
-  distinct(marker, .keep_all = T) 
+  dplyr::select(-c(taxa, DNA_RNA, count)) %>% 
+  distinct(marker, .keep_all = T) %>% 
+  ungroup() %>% 
+  left_join(tot_count)
+  
 write.csv(ex_all, file="../Shared/all_markers_RNA_DNA-with-genes_SW.csv")
 
