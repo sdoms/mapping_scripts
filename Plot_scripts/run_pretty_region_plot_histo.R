@@ -20,8 +20,8 @@ run_pretty_region <- function(directory,trait, Xtrue=T, method="bon"){
   total_out1 <- rbind(out_P, out_add.P)
   total_out2 <- rbind(total_out1, out_dom.P)
   write.table(total_out2, file=paste0("../results/",trait,"_results.txt"))
-  #setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Sterility/")
-  setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacula/")
+  setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Sterility/")
+  #setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacula/")
 }
 
 run_pretty_region("./apo_per_tubule/", "apo_per_tubule")
@@ -61,6 +61,52 @@ run_pretty_region("./vac_per_tubule/", "vac_per_tubule", method="fdr")
 run_pretty_region("./bmi/", "bmi", method="fdr")
 # run_pretty_region("./body_length/", "body_length", method="fdr") # too many
 # run_pretty_region("./tail_length_no_outliers/", "tail_length_no_outliers", method="fdr") # too many
+
+run_pretty_region("./sterPCA1_PC1/","sterPCA1_PC1", method="fdr")
+run_pretty_region("sterPCA1_PC2","sterPCA1_PC2", method="fdr")
+run_pretty_region("sterPCA1_PC3","sterPCA1_PC3", method="fdr")
+run_pretty_region("sterPCA1_PC4","sterPCA1_PC4", method="fdr")
+run_pretty_region("sterPCA1_PC5","sterPCA1_PC5", method="fdr")
+run_pretty_region("sterPCA1_PC6","sterPCA1_PC6", method="fdr")
+run_pretty_region("sterPCA2_PC1", "sterPCA2_PC1", method="fdr")
+run_pretty_region("sterPCA2_PC2","sterPCA2_PC2", method="fdr")
+run_pretty_region("sterPCA2_PC3","sterPCA2_PC3", method="fdr")
+run_pretty_region("sterPCA2_PC4","sterPCA2_PC4", method="fdr")
+run_pretty_regiono("sterPCA2_PC5","sterPCA2_PC5", method="fdr")
+run_pretty_region("sterPCA2_PC6","sterPCA2_PC6", method="fdr")
+run_pretty_region("sterPCA2_PC7","sterPCA2_PC7", method="fdr")
+run_pretty_region("sterPCA2_PC8","sterPCA2_PC8", method="fdr")
+
+run_pretty_region("sterPCA3_PC1","sterPCA3_PC1", method="fdr")
+run_pretty_region("sterPCA3_PC2", "sterPCA3_PC2", method="fdr")
+run_pretty_region("sterPCA3_PC3","sterPCA3_PC3", method="fdr")
+run_pretty_region("sterPCA3_PC4", "sterPCA3_PC4", method="fdr")
+run_pretty_region("sterPCA3_PC5","sterPCA3_PC5", method="fdr")
+run_pretty_region("sterPCA3_PC6","sterPCA3_PC6", method="fdr")
+run_pretty_region("sterPCA3_PC7", "sterPCA3_PC7", method="fdr")
+run_pretty_region("sterPCA3_PC8","sterPCA3_PC8", method="fdr")
+run_pretty_region("sterPCA3_PC9","sterPCA3_PC9", method="fdr")
+run_pretty_region("sterPCA3_PC10","sterPCA3_PC10", method="fdr")
+
+run_pretty_region("sterPCA4_PC1","sterPCA4_PC1", method="fdr")
+run_pretty_region("sterPCA4_PC2", "sterPCA4_PC2", method="fdr")
+run_pretty_region("sterPCA4_PC3", "sterPCA4_PC3", method="fdr")
+run_pretty_region("sterPCA4_PC4","sterPCA4_PC4", method="fdr")
+run_pretty_region("sterPCA4_PC5", "sterPCA4_PC5", method="fdr")
+run_pretty_region("sterPCA4_PC6","sterPCA4_PC6", method="fdr")
+
+run_pretty_region("sterPCA5_PC1","sterPCA5_PC1", method="fdr")
+run_pretty_region("sterPCA5_PC2", "sterPCA5_PC2", method="fdr")
+run_pretty_region("sterPCA5_PC3", "sterPCA5_PC3", method="fdr")
+run_pretty_region("sterPCA5_PC4", "sterPCA5_PC4", method="fdr")
+run_pretty_region("sterPCA5_PC5", "sterPCA5_PC5", method="fdr")
+run_pretty_region("sterPCA5_PC6", "sterPCA5_PC6", method="fdr")
+run_pretty_region("sterPCA5_PC7","sterPCA5_PC7", method="fdr")
+run_pretty_region("sterPCA5_PC8","sterPCA5_PC8", method="fdr")
+
+run_pretty_region("fecal_carb_perc","fecal_carb_perc", method="fdr")
+run_pretty_region("fecal_protein_perc", "fecal_protein_perc", method="fdr")
+
 
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacula/")
 run_pretty_region("bac_PC01/", "bac_PC01")
