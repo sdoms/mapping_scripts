@@ -96,3 +96,26 @@ write(all_genes,file="all_genes_RNA.txt")
 
 DNA_RNA_genes <- unique(append(all_genes, all_genes_DNA))
 write(DNA_RNA_genes,file="all_genes_DNA_RNA.txt")
+
+
+####################3
+
+setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/all_genes_snps/")
+library(tidyverse)
+library(stringr)
+library(readxl)
+
+infile <- read.csv("../../Shared/all_markers_RNA_DNA-with-genes_SW.csv")
+snp_genes<- as.character(unlist(sapply(infile$all_genes, FUN=function(x) strsplit(x, " | ", fixed = T))))
+snp_genes<- unique(snp_genes)
+preced_genes <-as.character(unlist(sapply(infile$all_preceding_genes, FUN=function(x) strsplit(x, " | ", fixed = T))))
+preced_genes<- unique(preced_genes)
+follow_genes <- as.character(unlist(sapply(infile$all_following_genes, FUN=function(x) strsplit(x, " | ", fixed = T))))
+follow_genes<- unique(follow_genes)
+
+all_genes <- c(snp_genes, preced_genes, follow_genes)
+all_genes<- unique(all_genes)
+
+write(all_genes, "all_genes_snps.txt")
+write(snp_genes, "all_snp_genes_snps.txt")
+
