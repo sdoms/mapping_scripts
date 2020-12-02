@@ -337,18 +337,25 @@ write.csv(ex_dist, paste0(outputdir,"markers_with_genes_DNA.csv"), row.names = F
 write.csv(ex_dist, paste0(outputdir,"markers_with_genes_RNA.csv"), row.names = F)
 
 final_out_dna <- read.csv(paste0("../DNA/", outputdir, "markers_with_genes_DNA.csv"))
-final_out_rna <- read.csv(paste0("../RNA/",outputdir, "markers_with_genes_RNA.csv"))
+final_out_rna <- read.csv(paste0("../RNA/",outputdir, "markers_with_genes_RNA.csv"),sep=";")
 
 final_out_dna$DNA_RNA <- "DNA"
 final_out_rna$DNA_RNA <- "RNA"
 
 all_final <- rbind(final_out_dna, final_out_rna)
 
+tot_count <-all_final %>%
+  group_by(marker, DNA_RNA) %>% 
+  mutate(taxa=ifelse(DNA_RNA == "DNA", paste("DNA:", all_taxa), paste("RNA:", all_taxa))) %>% 
+  group_by(marker) %>% 
+  summarise(total_count = sum(count))
 ex_all <- all_final %>%
   group_by(marker, DNA_RNA) %>% 
   mutate(taxa=ifelse(DNA_RNA == "DNA", paste("DNA:", all_taxa), paste("RNA:", all_taxa))) %>% 
   group_by(marker) %>% 
   mutate(all_taxa = paste(taxa, collapse = " | ")) %>% 
-  dplyr::select(-c(taxa, DNA_RNA,AA,AB, BB, count)) %>% 
-  distinct(marker, .keep_all = T) 
+  dplyr::select(-c(taxa, DNA_RNA, count)) %>% 
+  distinct(marker, .keep_all = T) %>% 
+  ungroup() %>% 
+  left_join(tot_count)
 write.csv(ex_all, file="../Shared/all_markers_RNA_DNA-with-genes_GW.csv")

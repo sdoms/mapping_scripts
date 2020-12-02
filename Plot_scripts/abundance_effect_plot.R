@@ -132,7 +132,62 @@ abundance.plot("G_Lactobacillus", "genus", "RNA", "UNC11687867")
 # UNC11691749
 abundance.plot("G_Lactobacillus", "genus", "RNA", "UNC11691749")
 
+# slc26a3 UNC20836314
+abundance.plot("unclassified_C_Deltaproteobacteria", "genus", "DNA", "UNC20836314")
+abundance.plot("unclassified_C_Deltaproteobacteria", "genus", "DNA", "UNCJPD004947")
+
+abundance.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNC20836314")
+abundance.plot("F_Staphylococcaceae", "family", "DNA", "UNC20836314")
+abundance.plot("F_Staphylococcaceae", "family", "RNA", "UNC20836314")
+abundance.plot("F_Staphylococcaceae", "family", "RNA", "UNCHS033197")
+
+abundance.plot("SV26", "otu", "DNA", "UNC20836314")
+abundance.plot("SV26", "otu", "DNA", "UNC20865798")
+
+abundance.plot("SV29", "otu", "DNA", "UNC20836314")
+abundance.plot("SV29", "otu", "DNA", "UNC20863257")
+
+abundance.plot("SV88", "otu", "DNA", "UNC20836314")
 
 
+abundance.plot("SV396", "otu", "RNA", "UNC20836314")
+abundance.plot("SV396", "otu", "RNA", "UNC20861803")
+abundance.plot("G_Acetatifactor", "genus", "RNA", "UNC20836314")
+abundance.plot("G_Acetatifactor", "genus", "RNA", "UNCJPD004947")
+
+
+#### adcy2
+abundance.plot("SV36", "otu", "RNA", "UNCHS036333")
+
+# Foxp1
+#DNA: F_Rikenellaceae | SV264 | SV20 | G_Alistipes | SV31 | SV63 | SV248 | SV21 
+# RNA: G_Lactobacillus | O_Lactobacillales | C_Bacilli | SV31 | SV181 | SV20 | F_Lactobacillaceae | O_Bacillales
+abundance.plot("SV20", "otu", "DNA", "UNC11687867")
+abundance.plot("SV31", "otu", "DNA", "UNC11687867")
+abundance.plot("SV63", "otu", "DNA", "UNC11687867")
+abundance.plot("SV248", "otu", "DNA", "UNC11687867")
+abundance.plot("SV21", "otu", "DNA", "UNC11687867")
+abundance.plot("F_Rikenellaceae", "family", "DNA", "UNC11687867")
+abundance.plot("G_Alistipes", "genus", "DNA", "UNC11687867")
+
+abundance.plot("SV31", "otu", "RNA", "UNC11687867")
+abundance.plot("SV181", "otu", "RNA", "UNC11687867")
+abundance.plot("SV20", "otu", "RNA", "UNC11687867")
+abundance.plot("G_Lactobacillus", "genus", "RNA", "UNC11687867")
+abundance.plot("O_Lactobacillales", "order", "RNA", "UNC11687867")
+abundance.plot("C_Bacilli", "class", "RNA", "UNC11687867")
+abundance.plot("F_Lactobacillaceae", "family", "RNA", "UNC11687867")
+abundance.plot("O_Bacillales", "order", "RNA", "UNC11687867")
+
+
+# slc3a1 UNCHS045125
+# DNA: SV7 | G_Paraprevotella | F_Prevotellaceae | RNA: F_Prevotellaceae | SV7 | G_Paraprevotella
+
+abundance.plot("SV7", "otu", "DNA", "UNCHS045125")
+abundance.plot("G_Paraprevotella", "genus", "DNA", "UNCHS045125")
+abundance.plot("F_Prevotellaceae", "family", "DNA", "UNCHS045125")
+abundance.plot("SV7", "otu", "RNA", "UNCHS045125")
+abundance.plot("G_Paraprevotella", "genus", "RNA", "UNCHS045125")
+abundance.plot("F_Prevotellaceae", "family", "RNA", "UNCHS045125")
 
 
