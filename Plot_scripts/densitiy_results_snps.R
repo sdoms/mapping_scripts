@@ -16,7 +16,7 @@ goodChrOrder <- c(1:19,"X")
 
 # results file 
 
-inputfile <- read.csv("./Results/Bacterial traits/Shared/all_markers_RNA_DNA-with-genes_GW.csv")
+inputfile <- read.csv("./Results/Bacterial traits/Shared/all_markers_RNA_DNA-with-genes_GW.csv", sep = ";")
 output <- data.frame()
 for (chr in goodChrOrder){
   df.tmp <- inputfile[inputfile$chr==chr,]

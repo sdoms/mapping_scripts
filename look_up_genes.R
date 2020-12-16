@@ -40,7 +40,7 @@ genes_RNA<- rbind(genes_RNA,ASV_RNA)
 genes_RNA$DNAorRNA <- "RNA"
 
 genes_DNA_RNA<-rbind(genes_DNA,genes_RNA)
-
+save(genes_DNA_RNA, file="genes_DNA_RNA.Rdata")
 
 
 oscilli <- read.delim("Arunabh_genes/all_genes_oscillibacter.txt",sep = "")
