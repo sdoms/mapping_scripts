@@ -1,5 +1,5 @@
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/genes_overlap/SW/overlap_with_other_studies/")
-input_SW<- read_csv2("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/sig.summaries/results_DNA_RNA_SW.csv")
+load("../../../all_genes_intervals/SW/genes_DNA_RNA_intervals_SW.Rdata")
 library(ggplot2)
 library(patchwork)
 library(VariantAnnotation)
@@ -57,7 +57,7 @@ write.table(input_SW_10mb, file="all_intervals_our_study_10mb.txt", row.names = 
 # write.table(reduced_intervals_10mb, file="reduced_intervals_our_study_10mb.txt", row.names = F)
 
 system("~/poverlap/poverlap2.py poverlap --a ../../other_studies/all_intervals_mouse_studies_10mb.txt --b all_intervals_our_study_10mb.txt -g ../../mouse.mm10.genome --n 9999")
-system("bedtools intersect -wo -a ../../other_studies/all_intervals_mouse_studies_10mb.txt -b ll_intervals_our_study_10mb.txt > bed_intersect_out.txt")
+system("bedtools intersect -wo -a ../../other_studies/all_intervals_mouse_studies_10mb.txt -b all_intervals_our_study_10mb.txt > bed_intersect_out.txt")
 
 overlaps <- read_delim("bed_intersect_out.txt",delim = "\t", col_names = F)
 colnames(overlaps)<- c("chrA", "startA", "endA","chrB", "startB", "endB", "width")
@@ -169,7 +169,7 @@ write.csv(final_out2, "genes_in_overlap_reduced_SW.csv")
 genes_reduced <- unique(out2$GENESYMBOL)
 write.table(genes_reduced, file="genes_list_reduced-SW.txt", row.names = F, quote = F, col.names = F)
 
-marker_genes<- read.csv("../../../../Shared/all_markers_RNA_DNA-with-genes_SW.csv", sep=";")
+marker_genes<- read.csv("../../../../Shared/all_markers_RNA_DNA-with-genes_SW.csv", sep=",")
 all_marker_genes<- stringr::str_to_upper(na.omit(unique(unlist(str_split(marker_genes$all_genes, " | ")))))
 all_marker_genes<- c(all_marker_genes, stringr::str_to_upper(na.omit(unique(unlist(str_split(marker_genes$all_preceding_genes, " | "))))))
 all_marker_genes<- c(all_marker_genes, stringr::str_to_upper(na.omit(unique(unlist(str_split(marker_genes$all_following_genes, " | "))))))
@@ -427,15 +427,12 @@ write(OE_overlap_intervals_CON, "OE_overlap_intervasls_CON.txt")
 write(all_unique_marker_genes, "all_genes_from_markers_in_overlap.txt")
 
 
-OE
+
 ###### Venn diagram #####
 library(VennDiagram)
 library(stringr)
 
-# Generate 3 sets of 200 words
-set1 <- paste(rep("word_" , 200) , sample(c(1:1000) , 200 , replace=F) , sep="")
-set2 <- paste(rep("word_" , 200) , sample(c(1:1000) , 200 , replace=F) , sep="")
-set3 <- paste(rep("word_" , 200) , sample(c(1:1000) , 200 , replace=F) , sep="")
+
 # Prepare a palette of 3 colors with R colorbrewer:
 library(RColorBrewer)
 myCol <- brewer.pal(3, "Pastel2")

@@ -12,9 +12,8 @@ load("../../../Cleaning_snps/consensus_F0_all.Rdata")
 parents <- as.data.frame(reduced_geno)
 parents$X <- rownames(parents)
 musdom <- merge(musdom, parents, by="X", )
-
-outputdir <- "summary_tables/study_wide_significant/all_signif_snps/"
-#trait <- "class"
+DNAorRNA <- "RNA"
+outputdir <- "../Genes/all_genes_snps/"
 for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   tax_table <- read.csv(paste0("../../../Phenotyping_27.02.2020/tables_core/",trait,"_tax_table_f2_core.csv" ))
   
@@ -27,9 +26,34 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   sig.dom.P <- data.frame()
   colnames(tax_table)<- tolower(colnames(tax_table))
   if (trait =="otu"){
-    tax_table <- tax_table[,c(3,5:10)]
-    colnames(tax_table) <- c("otu", "kingdom", "phylum", "class", "order", "family", "genus")
-  }
+    #tax_table<- read.table("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotyping_27.02.2020/tables_core/dna_core.txt")
+    tax_table<- read.table("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotyping_27.02.2020/tables_core/rna_core.txt")
+    
+    for (gws in tax_table$taxa){
+      gwscan <- data.frame()
+      for (chr in 1:19){
+        tx <- readRDS(paste0(trait, "/",gws, "_chr_", chr, "with_add_dom.rds"))
+        gwscan <- rbind(gwscan, tx)
+      }
+      if (file.exists(paste0(trait,"/",gws, "_chrX.rds"))){
+        X_chrom <- readRDS(paste0(trait,"/",gws, "_chrX.rds"))
+        #X_chrom$chr <- "20"
+        gwscan <- dplyr::bind_rows(gwscan, X_chrom)
+        chrom_range <- c(1:19, "X")
+        
+      }
+      # Bonferonni threshold 
+      threshold <- 0.05/nrow(gwscan)/118.2177
+      colnames(gwscan) <- c("marker", "chr", "pos", "cM", "B_ref", "A_min", "taxon", "n", "AA", "AB", "BB", "add.Beta", "add.StdErr", "add.Z.score", "dom.Beta", "dom.StdErr", "dom.Z.score", "P", "add.P", "dom.P", "index")
+      sig_gwscan_P <- gwscan[which(gwscan$P<threshold),]
+      sig_gwscan_add.P <- gwscan[which(gwscan$add.P<threshold),]
+      sig_gwscan_dom.P <- gwscan[which(gwscan$dom.P<threshold),]
+      sig.P <- rbind(sig.P, sig_gwscan_P)
+      sig.add.P <- rbind(sig.add.P, sig_gwscan_add.P)
+      sig.dom.P <- rbind(sig.dom.P, sig_gwscan_dom.P)
+      
+    }
+  } else {
   for (gws in tax_table[,trait]){
     gwscan <- data.frame()
     for (chr in 1:19){
@@ -54,14 +78,15 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
     sig.dom.P <- rbind(sig.dom.P, sig_gwscan_dom.P)
     
   }
+  }
   # add mus dom
   sig.P <- merge(sig.P, musdom, by.x = "marker", by.y="X", all.x = T)
   sig.add.P <- merge(sig.add.P, musdom, by.x = "marker", by.y="X", all.x = T)
   sig.dom.P <- merge(sig.dom.P, musdom, by.x = "marker", by.y="X", all.x = T)
   
-  write.table(x = unique(sig.P), file=paste0(outputdir,trait, "_all_sig_snps_P.txt"))
-  write.table(x = unique(sig.add.P), file=paste0(outputdir,trait, "_all_sig_snps_add_P.txt"))
-  write.table(x = unique(sig.dom.P), file=paste0(outputdir,trait, "_all_sig_snps_dom_P.txt"))
+  write.table(x = unique(sig.P), file=paste0(outputdir,trait, DNAorRNA,"_all_sig_snps_P.txt"))
+  write.table(x = unique(sig.add.P), file=paste0(outputdir,trait, DNAorRNA,"_all_sig_snps_add_P.txt"))
+  write.table(x = unique(sig.dom.P), file=paste0(outputdir,trait, DNAorRNA,"_all_sig_snps_dom_P.txt"))
   
   all_sig1 <- rbind(sig.P, sig.add.P)
   all_sig <- rbind(all_sig1, sig.dom.P)
@@ -75,7 +100,7 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   
   
   add+dom + plot_annotation(title=trait, tag_levels = "A")
-  ggsave(paste0(outputdir, trait, "_all_sig_snps-zscore.pdf"))
+  ggsave(paste0(outputdir, trait, DNAorRNA,"_all_sig_snps-zscore.pdf"))
   
 } 
 
@@ -95,11 +120,35 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   
   colnames(tax_table)<- tolower(colnames(tax_table))
   if (trait =="otu"){
-    tax_table<- tax_table[,c(3,5:10)]
-    colnames(tax_table) <- c("otu", "kingdom", "phylum", "class", "order", "family", "genus")
-  }
-  
-  for (gws in tax_table[,trait]){
+    #tax_table<- read.table("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotyping_27.02.2020/tables_core/dna_core.txt")
+    tax_table<- read.table("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotyping_27.02.2020/tables_core/rna_core.txt")
+    
+    for (gws in tax_table$taxa){
+      gwscan <- data.frame()
+      for (chr in 1:19){
+        tx <- readRDS(paste0(trait, "/",gws, "_chr_", chr, "with_add_dom.rds"))
+        gwscan <- rbind(gwscan, tx)
+      }
+      if (file.exists(paste0(trait,"/",gws, "_chrX.rds"))){
+        X_chrom <- readRDS(paste0(trait,"/",gws, "_chrX.rds"))
+        #X_chrom$chr <- "20"
+        gwscan <- dplyr::bind_rows(gwscan, X_chrom)
+        chrom_range <- c(1:19, "X")
+        
+      }
+      # Bonferonni threshold 
+      #same as above
+      
+      sig_gwscan_P <- gwscan[which(gwscan$P<threshold),]
+      sig_gwscan_add.P <- gwscan[which(gwscan$add.P<threshold),]
+      sig_gwscan_dom.P <- gwscan[which(gwscan$dom.P<threshold),]
+      sig.P <- rbind(sig.P, sig_gwscan_P)
+      sig.add.P <- rbind(sig.add.P, sig_gwscan_add.P)
+      sig.dom.P <- rbind(sig.dom.P, sig_gwscan_dom.P)
+      
+    }
+  } else {
+    for (gws in tax_table[,trait]){
     gwscan <- data.frame()
     for (chr in 1:19){
       tx <- readRDS(paste0(trait, "/",gws, "_chr_", chr, "with_add_dom.rds"))
@@ -122,18 +171,22 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
     sig.add.P <- rbind(sig.add.P, sig_gwscan_add.P)
     sig.dom.P <- rbind(sig.dom.P, sig_gwscan_dom.P)
     
-  }
+  }}
+    
   
-} 
+  
+  
+  
+ }
 
 # add mus dom
 sig.P <- merge(sig.P, musdom, by.x = "marker", by.y="X", all.x = T)
 sig.add.P <- merge(sig.add.P, musdom, by.x = "marker", by.y="X", all.x = T)
 sig.dom.P <- merge(sig.dom.P, musdom, by.x = "marker", by.y="X", all.x = T)
 
-write.table(x = unique(sig.P), file=paste0(outputdir,"ALL_sig_snps_P.txt"))
-write.table(x = unique(sig.add.P), file= paste0(outputdir,"ALL_sig_snps_add_P.txt"))
-write.table(x = unique(sig.dom.P), file=paste0(outputdir,"ALL_sig_snps_dom_P.txt"))
+write.table(x = unique(sig.P), file=paste0(outputdir,DNAorRNA,"ALL_sig_snps_P.txt"))
+write.table(x = unique(sig.add.P), file= paste0(outputdir,DNAorRNA,"ALL_sig_snps_add_P.txt"))
+write.table(x = unique(sig.dom.P), file=paste0(outputdir,DNAorRNA,"ALL_sig_snps_dom_P.txt"))
 
 all_sig1 <- rbind(sig.P, sig.add.P)
 all_sig <- rbind(all_sig1, sig.dom.P)
@@ -145,10 +198,10 @@ add <- ggplot(deduped.data, aes(x=add.T)) + geom_histogram() + labs(x="Additive 
 dom <- ggplot(deduped.data, aes(x=dom.T)) +geom_histogram(colour="black", fill="white")+ labs(x="Dominance effect Z-score")+ theme(axis.title = element_text(size=9))  
 
 
-add+dom + plot_annotation(title="All DNA", tag_levels = "A")
-ggsave(paste0(outputdir,"ALL_sig_snps-zscore.pdf"))
+add+dom + plot_annotation(title="All RNA", tag_levels = "A")
+ggsave(paste0(outputdir,DNAorRNA,"ALL_sig_snps-zscore.pdf"))
 
-write.table(x = deduped.data, file=paste0(outputdir,"ALL_sig_snps_allP.txt"))
+write.table(x = deduped.data, file=paste0(outputdir,DNAorRNA,"ALL_sig_snps_allP.txt"))
 
 ex <- deduped.data %>%
   group_by(marker) %>%
@@ -160,7 +213,7 @@ ex <- deduped.data %>%
   arrange(chr,pos) %>% 
   mutate(chr=replace_na(chr,"X"))
 
-write.table(ex,paste0(outputdir,"summary_table_DNA_markers_count.txt"))  
+#write.table(ex,paste0(outputdir,"summary_table_DNA_markers_count.txt"))  
 write.table(ex,paste0(outputdir,"summary_table_RNA_markers_count.txt")) 
 # setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/")
 # deduped.data <- read.table(paste0(outputdir,"ALL_sig_snps_allP.txt"))
