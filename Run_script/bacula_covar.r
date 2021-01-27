@@ -123,13 +123,17 @@ for (chr in 1:19){
   
   
   system.time(f<-mclapply(as.list(sub), function(snp){
-    df<-data.frame(lmm.data,ad=gts[,snp],dom=dom.mat[,snp],gt=geno[,snp])
+    df<-data.frame(lmm.data,ad=add.mat[,snp],dom=dom.mat[,snp],gt=geno[,snp])
     df<-df[is.na(df$ad)==F & is.na(df$tax)==F & is.na(df$covar)==F &is.na(df$gt)==F & is.na(df$dom)==F,]
     if (nrow(df)!=size){
       null_model <- relmatLmer(tax ~  covar +   (1|id), df,relmat=list(id=kinship))
     }
     model <- relmatLmer(tax ~ ad+dom +  covar + (1|id), df,relmat=list(id=kinship))
-    res<-c(nrow(df),table(factor(df$ad,levels=c(-1,0,1))),tryCatch(summary(model)$coefficients[2,], error=function(x) return(rep(NA,3))),tryCatch(summary(model)$coefficients[3,], error=function(x) return(rep(NA,3))),tryCatch(anova(null_model,model)[2,8], error=function(x) return(NA)), tryCatch(Anova(model)[1:2,3],error=function(x) return(rep(NA, 2)) ))
+    res<-c(nrow(df),table(factor(df$ad,levels=c(-1,0,1))),
+           tryCatch(summary(model)$coefficients[2,], error=function(x) return(rep(NA,3))),
+           tryCatch(summary(model)$coefficients[3,], error=function(x) return(rep(NA,3))),
+           tryCatch(anova(null_model,model)[2,8], error=function(x) return(NA)), 
+           tryCatch(Anova(model)[1:2,3],error=function(x) return(rep(NA, 2)) ))
     names(res)<-c("n","AA","AB","BB","add.Beta","add.StdErr","add.T","dom.Beta", "dom.StdErr", "dom.T", "P", "add.P", "dom.P")
     
     return(res)},mc.cores=getOption("mc.cores", 20)))

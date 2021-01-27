@@ -1,4 +1,4 @@
-setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/")
+setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/genes_overlap/")
 library(tidyverse)
 library(stringr)
 library(readxl)

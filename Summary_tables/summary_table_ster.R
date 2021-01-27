@@ -225,14 +225,14 @@ write.csv(final_out, "bacula_PC_markers_with_genes.csv", row.names = F)
 
 
 
-# pretty table ##### for paper? 
-devtools::install_github("glin/reactable")
-library(reactable)
-reactable(ex)
-
-devtools::install_github("haozhu233/kableExtra")
-library(kableExtra)
-ex %>%
-  kbl() %>%
-  kable_classic(full_width = T)
+# # pretty table ##### for paper? 
+# devtools::install_github("glin/reactable")
+# library(reactable)
+# reactable(ex)
+# 
+# devtools::install_github("haozhu233/kableExtra")
+# library(kableExtra)
+# ex %>%
+#   kbl() %>%
+#   kable_classic(full_width = T)
 

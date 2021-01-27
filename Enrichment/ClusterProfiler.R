@@ -5,42 +5,48 @@ BiocManager::install("clusterProfiler")
 
 library(clusterProfiler)
 library(tidyverse)
-setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/")
-
-results_file<- read.csv("summary_tables/genome_wide_significant/all_signif_snps/markers_with_genes_DNA.csv")
+library("AnnotationDbi")
+setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/genes_overlap/SW/mills/intervals/")
+# results_file<- read_csv2("sig.summaries/results_DNA_SW.csv")
 # 
 # genes <- results_file %>% 
 #   select(all_genes) %>% 
 #   distinct() %>% 
 #   drop_na()
+genes<- read_tsv("genes_overlap_intervals_all_curated_SW_entrez.txt")
 
-genes <- na.omit(unique(as.vector(do.call('rbind', strsplit(as.character(results_file$all_genes),'|',fixed=TRUE))) ))
+
+
 # WIKIPATHWAYS #####
-wp2gene <- read.gmt("../../../wikipathways-20201010-gmt-Mus_musculus.gmt")
+wp2gene <- read.gmt("~/Documents/PhD/Experiments/Final_QTL_mapping/wikipathways-20201010-gmt-Mus_musculus.gmt")
 wp2gene <- wp2gene %>% tidyr::separate(term, c("name","version","wpid","org"), "%")
 wpid2gene <- wp2gene %>% dplyr::select(wpid, gene) #TERM2GENE
 wpid2name <- wp2gene %>% dplyr::select(wpid, name) #TERM2NAME
 
 # convert symbols back to entrez ids
+#BiocManager::install("org.Mm.eg.db")
+BiocManager::install("org.Hs.eg.db")
 library(org.Mm.eg.db) # remember to install it if you don't have it already
-genes_entrez <- mapIds(org.Mm.eg.db, keys = genes, keytype = "SYMBOL", column="ENTREZID")
-
-ewp <- enricher(genes_entrez, TERM2GENE = wpid2gene, TERM2NAME = wpid2name)
+# genes_entrez <- mapIds(org.Mm.eg.db, keys = genes, keytype = "SYMBOL", column="ENTREZID")
+# genes_entrez<- transform(genes_entrez, gene=as.numeric(genes_entrez))
+ewp <- enricher(genes$To, TERM2GENE = wpid2gene, TERM2NAME = wpid2name)
 ewp <- setReadable(ewp, org.Mm.eg.db, keyType = "ENTREZID")
 head(ewp)
-
+cnetplot(ewp)
 # Cellmarker ####
 
 cell_markers <- vroom::vroom('http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/Mouse_cell_markers.txt') %>%
   tidyr::unite("cellMarker", tissueType, cancerType, cellName, sep=", ") %>% 
   dplyr::select(cellMarker, geneID) %>%
   dplyr::mutate(geneID = strsplit(geneID, ', '))
+
 cell_markers
-y <- enricher(genes_entrez, TERM2GENE=cell_markers, minGSSize=1)
+y <- enricher(genes$To, TERM2GENE=cell_markers, minGSSize=1)
 DT::datatable(as.data.frame(y))
 y<- setReadable(y, org.Mm.eg.db, keyType = "ENTREZID")
 DT::datatable(as.data.frame(y))
 
+cnetplot(y)
 # MgSigDb analysis ####
 
 library(msigdbr)
@@ -50,7 +56,7 @@ head(m_df, 2) %>% as.data.frame
 m_t2g <- msigdbr(species = "Mus musculus", category = "C7") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 
 # HAllmark gene sets: are coherently expressed signatures derived 
@@ -58,13 +64,13 @@ head(em)
 m_t2g <- msigdbr(species = "Mus musculus", category = "H") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 # curated gene sets  from online pathway databases, publications in PubMed, and knowledge of domain experts.
 m_t2g <- msigdbr(species = "Mus musculus", category = "C2") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 em_c2<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 
@@ -72,7 +78,7 @@ em_c2<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 m_t2g <- msigdbr(species = "Mus musculus", category = "C3") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 em_c3<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 
@@ -80,7 +86,7 @@ em_c3<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 m_t2g <- msigdbr(species = "Mus musculus", category = "C4") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 em_c4<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 
@@ -88,7 +94,7 @@ em_c4<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 m_t2g <- msigdbr(species = "Mus musculus", category = "C5") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 em_c5<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 
@@ -97,7 +103,7 @@ em_c5<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 m_t2g <- msigdbr(species = "Mus musculus", category = "C6") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 em_c6<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 
@@ -105,19 +111,42 @@ em_c6<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 m_t2g <- msigdbr(species = "Mus musculus", category = "C7") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
-#em_c6<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID") # nothing significant
+em_c6<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID") # nothing significant
 
 # cell type signature gene sets  curated from cluster markers identified in single-cell sequencing studies of human tissue.
 m_t2g <- msigdbr(species = "Mus musculus", category = "C8") %>% 
   dplyr::select(gs_name, entrez_gene)
 head(m_t2g)
-em <- enricher(genes_entrez, TERM2GENE=m_t2g)
+em <- enricher(genes$To, TERM2GENE=m_t2g)
 head(em)
 em_c8<- setReadable(em, org.Mm.eg.db, keyType = "ENTREZID")
 
+genes_entrez <- genes$To
 # Disease analysis ####
+# find human orthologs of mouse genes
+
+# Basic function to convert mouse to human gene names
+gene.df <- bitr(genes_entrez, fromType = "ENTREZID",
+                toType = c("ENSEMBL", "SYMBOL"),
+                OrgDb = org.Mm.eg.db)
+
+convertMouseGeneList <- function(x){
+  require("biomaRt")
+  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+  genesV2 = getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values = x , mart = mouse, attributesL = c("hgnc_symbol"), martL = human, uniqueRows=T)
+  humanx <- unique(genesV2[, 2])
+  # Print the first 6 genes found to the screen
+  print(head(humanx))
+  return(humanx)
+}
+humanx<- convertMouseGeneList(gene.df$SYMBOL)
+library(org.Hs.eg.db)
+genes_entrez <- mapIds(org.Hs.eg.db, keys = humanx, keytype = "SYMBOL", column="ENTREZID")
+
+
 library(DOSE)
 x <- enrichDO(gene          = genes_entrez,
               ont           = "DO",
@@ -126,8 +155,9 @@ x <- enrichDO(gene          = genes_entrez,
               minGSSize     = 5,
               maxGSSize     = 500,
               qvalueCutoff  = 0.05,
-              readable      = FALSE)
-x <- setReadable(x, org.Mm.eg.db, keyType = "ENTREZID")
+              readable      = FALSE, 
+              universe=NULL)
+x <- setReadable(x, org.Hs.eg.db, keyType = "ENTREZID")
 head(x)
 
  # NEtwork of Cancer Gene ####
@@ -137,13 +167,13 @@ head(ncg)
 
 # DisGenNET ####
 dgn <- enrichDGN(unname(genes_entrez))
-
+dgn <- setReadable(dgn, org.Hs.eg.db, keyType = "ENTREZID")
+library(enrichplot)
+barplot(dgn, showCategory=20)
 
 # GO classifier #####
-gene.df <- bitr(genes_entrez, fromType = "ENTREZID",
-                toType = c("ENSEMBL", "SYMBOL"),
-                OrgDb = org.Mm.eg.db)
-ggo <- groupGO(gene     = genes_entrez,
+# back to mouse genes
+ggo <- groupGO(gene     = as.character(genes$To),
                OrgDb    = org.Mm.eg.db,
                ont      = "CC",
                level    = 3,
@@ -152,29 +182,77 @@ ggo <- groupGO(gene     = genes_entrez,
 head(ggo)
 
 # GO overrepresentation ####
-ego <- enrichGO(gene          = genes_entrez,
+ego <- enrichGO(gene          = as.character(genes$To),
+                OrgDb         = org.Mm.eg.db,
+                ont           = "BP",
+                pAdjustMethod = "BH",
+                pvalueCutoff  = 0.01,
+                qvalueCutoff  = 0.05,
+                readable      = TRUE)
+head(ego)
+goplot(ego2)
+ego2 <- clusterProfiler::simplify(ego, cutoff=0.7, by="p.adjust", select_fun=min)
+cnetplot(ego2)
+p1 <- dotplot(ego2, showCategory=30) + ggtitle("dotplot for BP")
+ego_mf <- enrichGO(gene          = as.character(genes$To),
+                OrgDb         = org.Mm.eg.db,
+                ont           = "MF",
+                pAdjustMethod = "BH",
+                pvalueCutoff  = 0.01,
+                qvalueCutoff  = 0.05,
+                readable      = TRUE)
+ego2_mf <- clusterProfiler::simplify(ego_mf, cutoff=0.7, by="p.adjust", select_fun=min)
+cnetplot(ego2_mf)
+p2 <- dotplot(ego2_mf, showCategory=30) + ggtitle("dotplot for MF")
+
+ego_cc <- enrichGO(gene          = as.character(genes$To),
                 OrgDb         = org.Mm.eg.db,
                 ont           = "CC",
                 pAdjustMethod = "BH",
                 pvalueCutoff  = 0.01,
                 qvalueCutoff  = 0.05,
                 readable      = TRUE)
-head(ego)
-ego2 <- clusterProfiler::simplify(ego, cutoff=0.7, by="p.adjust", select_fun=min)
-head(ego2)
-
+ego2_cc <- clusterProfiler::simplify(ego_cc, cutoff=0.7, by="p.adjust", select_fun=min)
+cnetplot(ego2_cc)
+p3 <- dotplot(ego2_cc, showCategory=30) + ggtitle("dotplot for CC")
+library(patchwork)
+p1/p2/p3
 # KEGG analysis #####
 search_kegg_organism('mmu', by='kegg_code')
-kk <- enrichKEGG(gene         = genes_entrez,
+kk <- enrichKEGG(gene         = as.character(genes$To),
                  organism     = 'mmu',
                  pvalueCutoff = 0.05)
 head(kk)
 kk<- setReadable(kk, org.Mm.eg.db, keyType = "ENTREZID")
-
-mkk <- enrichMKEGG(gene = genes_entrez,
+cnetplot(kk, showCategory = 11)
+ggsave("netplot_kegg_pathways.pdf")
+mkk <- enrichMKEGG(gene = as.character(genes$To),
                    organism = 'mmu')
 head(mkk)
+library(pathview)
+mmu04975 <- pathview(gene.data  = as.character(genes$To),
+                     pathway.id = "mmu04975",
+                     species    = "mmu")
+mmu04972 <- pathview(gene.data  = as.character(genes$To),
+                     pathway.id = "mmu04972",
+                     species    = "mmu")
+for (id in kk$ID){
+  pathway <- pathview(gene.data  = as.character(genes$To),
+                      pathway.id = id,
+                      species    = "mmu")
+}
 
 library(meshes)
-x <- enrichMeSH(genes_entrez, MeSHDb = "MeSH.Mmu.eg.db", database='gendoo', category = 'C')
+library(meshes)
+x <- enrichMeSH(as.character(genes$To), MeSHDb = "MeSH.Mmu.eg.db", database='gendoo', category = 'C')
 head(x)
+
+
+edox <- setReadable(dgn, 'org.Mm.eg.db', 'ENTREZID')
+p1 <- cnetplot(edox)
+p1
+## categorySize can be scaled by 'pvalue' or 'geneNum'
+p2 <- cnetplot(edox, categorySize="pvalue")
+p2
+p3 <- cnetplot(edox, circular = TRUE, colorEdge = TRUE)
+cowplot::plot_grid(p1, p2, p3, ncol=3, labels=LETTERS[1:3], rel_widths=c(.8, .8, 1.2))
