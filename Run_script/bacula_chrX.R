@@ -79,7 +79,7 @@ kinship<- as.matrix(kinship)
 rownames(kinship)<- indi_all
 colnames(kinship)<-indi_all
 
-gts<-add.mat[individuals,]
+gts<-add.mat
 sub<-colnames(gts)[colMeans(gts,na.rm=T)/2>0.025 & colMeans(gts,na.rm=T)/2<0.975 & is.na(colMeans(gts,na.rm=T))==F]
 gts<-gts[,sub]
 out<-data.frame(snps[sub,1:6],tax=NA,n=NA,AA=NA,AB=NA,BB=NA,add.Beta=NA,add.StdErr=NA,add.T=NA,P=NA)

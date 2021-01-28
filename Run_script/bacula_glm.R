@@ -108,7 +108,7 @@ for (chr in 1:19){
 
   # select markers from chromosome
   marker_chr <- snps[which(snps$chr==chr),1]
-  gts<-add.mat[individuals,marker_chr]
+  gts<-add.mat[,marker_chr]
   sub<-colnames(gts)[colMeans(gts,na.rm=T)/2>0.025 & colMeans(gts,na.rm=T)/2<0.975 & is.na(colMeans(gts,na.rm=T))==F]
   gts<-gts[,sub]
   # prepare output dataframe
