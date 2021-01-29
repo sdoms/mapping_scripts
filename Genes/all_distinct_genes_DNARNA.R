@@ -147,7 +147,7 @@ library(tidyverse)
 library(stringr)
 library(readxl)
 
-infile <- read.csv("../../Shared/all_markers_RNA_DNA-with-genes_SW.csv", sep=",")
+infile <- read.csv("all_markers_RNA_DNA-with-genes_SW.csv", sep=";")
 snp_genes<- as.character(unlist(sapply(infile$all_genes, FUN=function(x) strsplit(x, " | ", fixed = T))))
 snp_genes<- unique(snp_genes)
 preced_genes <-as.character(unlist(sapply(infile$all_preceding_genes, FUN=function(x) strsplit(x, " | ", fixed = T))))

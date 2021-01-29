@@ -1,12 +1,23 @@
-setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/genes_overlap/")
+setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/genes_overlap/SW/overlap_with_other_studies/")
 
 library(tidyverse)
-mm10 <- read.table("mouse.mm10.genome")
+mm10 <- read.table("../../mouse.mm10.genome")
 colnames(mm10)<- c("chr", "chr_len")
 
-overlaps <- read_excel("intersect_out.xlsx", sheet="overlaps")
-colnames(overlaps)<- c("chr", "start", "end", "width")
-chr1 <- overlaps[overlaps$chr=="chr2",]
+
+overlaps <- read_delim("bed_intersect_out.txt",delim = "\t", col_names = F)
+colnames(overlaps)<- c("chrA", "startA", "endA","chrB", "startB", "endB", "width")
+overlap_intervals <- overlaps %>% 
+  rowwise() %>% 
+  mutate(start=max(startA, startB), end=min(endA, endB)) %>% 
+  mutate(length=end-start)
+
+overlap_intervals_uniq <- overlap_intervals %>% 
+  distinct(chrA, start, end)
+
+# overlaps <- read_excel("intersect_out.xlsx", sheet="overlaps")
+# colnames(overlaps)<- c("chr", "start", "end", "width")
+# chr1 <- overlaps[overlaps$chr=="chr2",]
 
 
 #goodChrOrder <- paste0("chr",c(1:19,"X"))
@@ -14,7 +25,7 @@ goodChrOrder <- c(1:19)
 
 output <- data.frame()
 for (chr in goodChrOrder){
-  df.tmp <- overlaps[overlaps$chr==paste0("chr",chr),]
+  df.tmp <- overlap_intervals[overlap_intervals$chrA==paste0("chr",chr),]
   dd<- c()
   for (x in 1:nrow(df.tmp)){
     dd<- c(dd,seq(df.tmp$start[x],df.tmp$end[x], 1e6))
@@ -56,7 +67,8 @@ snp_plot <- ggplot()+
   
   geom_segment(data=output, 
                aes(x=chr, xend=chr, y=start, yend=end, color=Freq), size=5)+
-  coord_flip() + scale_color_viridis_c(option="magma", direction = -1, limits=c(0,30)) + 
-  labs(y="Position (Mb)", x= "Chromosome", color="Overlap count") +theme_test()
+  coord_flip() + scale_color_viridis_c(option="magma", direction = -1, limits=c(0,10)) + 
+  labs(y="Position (Mb)", x= "Chromosome", color="Overlap count of other studies") +theme_test()
 snp_plot + scale_x_discrete(limits=factor(goodChrOrder))
-ggsave("overlapping_studies_intervals.pdf")
+ggsave("overlapping_studies_intervals_SW.pdf")
+write.table(output, "freq_overlaps.txt")

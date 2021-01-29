@@ -91,9 +91,9 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   all_sig1 <- rbind(sig.P, sig.add.P)
   all_sig <- rbind(all_sig1, sig.dom.P)
   deduped.data <- unique( all_sig )
-  if (trait == "family" | trait == "genus"){
-    deduped.data <- deduped.data[which(deduped.data$marker!="UNCHS040366"),]
-  }
+  # if (trait == "family" | trait == "genus"){
+  #   deduped.data <- deduped.data[which(deduped.data$marker!="UNCHS040366"),]
+  # }
   
   add <- ggplot(deduped.data, aes(x=add.Z.score)) + geom_histogram() + labs(x="Additive effect Z-score ")+ theme(axis.title = element_text(size=9))
   dom <- ggplot(deduped.data, aes(x=dom.Z.score)) +geom_histogram(colour="black", fill="white")+ labs(x="Dominance effect Z-score")+ theme(axis.title = element_text(size=9))  
@@ -114,6 +114,9 @@ sig.dom.P <- data.frame()
 for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   tax_table <- read.csv(paste0("../../../Phenotyping_27.02.2020/tables_core/",trait,"_tax_table_f2_core.csv" ))
   #gws <- "C_Bacilli"
+  if (trait=="genus"|trait=="family"| trait =="order"){
+    tax_table<- tax_table[-6,]
+  } 
   Xtrue <- TRUE
   
   chrom_range <- c(1:19)
@@ -122,6 +125,7 @@ for (trait in c("phylum", "class", "order", "family", "genus", "otu")){
   if (trait =="otu"){
     #tax_table<- read.table("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotyping_27.02.2020/tables_core/dna_core.txt")
     tax_table<- read.table("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotyping_27.02.2020/tables_core/rna_core.txt")
+
     
     for (gws in tax_table$taxa){
       gwscan <- data.frame()
@@ -192,7 +196,7 @@ all_sig1 <- rbind(sig.P, sig.add.P)
 all_sig <- rbind(all_sig1, sig.dom.P)
 deduped.data <- unique( all_sig )
 
-deduped.data <- deduped.data[which(deduped.data$marker!="UNCHS040366"),]
+#deduped.data <- deduped.data[which(deduped.data$marker!="UNCHS040366"),]
 
 add <- ggplot(deduped.data, aes(x=add.T)) + geom_histogram() + labs(x="Additive effect Z-score ")+ theme(axis.title = element_text(size=9))
 dom <- ggplot(deduped.data, aes(x=dom.T)) +geom_histogram(colour="black", fill="white")+ labs(x="Dominance effect Z-score")+ theme(axis.title = element_text(size=9))  
@@ -354,7 +358,7 @@ write.csv(ex_dist, paste0(outputdir,"markers_with_genes_RNA_SW.csv"), row.names 
 
 final_out_rna<- ex_dist
 final_out_rna<- read.csv(paste0("../RNA/", outputdir, "markers_with_genes_RNA_SW.csv"), sep = ";")
-final_out_dna <- read.csv(paste0("../DNA/", outputdir, "markers_with_genes_DNA_SW.csv"), sep = ";")
+final_out_dna <- read.csv(paste0("../DNA/", outputdir, "markers_with_genes_DNA_SW.csv"), sep = ",")
 
 final_out_dna$DNA_RNA <- "DNA"
 final_out_rna$DNA_RNA <- "RNA"
@@ -377,4 +381,5 @@ ex_all <- all_final %>%
   left_join(tot_count)
   
 write.csv(ex_all, file="../Shared/all_markers_RNA_DNA-with-genes_SW.csv")
+write.csv(ex_all, file="../Genes/all_genes_snps/all_markers_RNA_DNA-with-genes_SW.csv")
 
