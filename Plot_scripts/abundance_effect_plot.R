@@ -1,88 +1,52 @@
+source('~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Plot_scripts/Effect_plots.R')
 
-abundance.plot <- function(taxa, trait, DNAorRNA, marker){
-  require(readxl)
-  require(ggplot2)
-  require(reshape2)
-  require(cowplot)
-  require(ggpubr)
-  
-  cbbPalette <- c("#1f78b4",  "#a6cee3","#b2df8a","#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", '#6a3d9a', "#ffff99", "#b15928", "#40e0d0", "#ffff00", "#ee82ee", "#fb8072", "#191970", "#fdb462", "#CBD4D4", "#fccde5", "#d9d9d9", "#bc80bd", "#32cd32", "#ffed6f", "lightcoral" )
-  # load("~/Documents/PhD/Experiments/QTL_mapping_results/cleaning/clean_geno.Rdata")
-  load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_geno.Rdata")
-  load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_snps.Rdata")
-  theme_set(theme_test())
-  
-  clean_geno <- as.data.frame(clean_geno)
-  colnames(clean_geno) <- gsub(x = colnames(clean_geno), pattern = "\\/", replacement = ".")  
-  all_mark <-clean_geno[marker,]
-  info_marker <- snps[marker,]
-  a <- info_marker$A1 # a1 is the reference allele BB 1
-  b <- info_marker$A2 # a2 is the minor allele AA -1 
-  genotypes <- t(all_mark)
-  
-  consensus <-read.csv("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/consensus_mus_dom.csv", sep=",")
-  allele_freq <-read.csv("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/allele_freq_consensus_mus_dom.csv", sep=",")
-  rownames(consensus)<- consensus$X 
-  consensus$X <- NULL
-  mus_dom <- consensus[marker,]
 
-  
-  # abundances
-  #DNAorRNA <- "DNA"
-  # otu_table <- read.csv(paste0("~/Documents/PhD/Experiments/Miseq_hybrid_mice/DNA_and_RNA/tables_core/",trait, "_table_f2_core.csv"))
-  otu_table <- read.csv(paste0("~/Documents/PhD/Experiments/Final_QTL_mapping/Phenotyping_27.02.2020/tables_core/",trait, "_table_f2_core.csv"))
-  rownames(otu_table)<- otu_table$X
-  otu_table <- otu_table[which(grepl(paste0("_",DNAorRNA),rownames(otu_table))),] # only do the DNA
-  rownames(otu_table) <- substr(rownames(otu_table), 1,15)
-  
-  SV <- as.data.frame(otu_table[,taxa])
-  rownames(SV) <- rownames(otu_table)
-  tot_with_SV <- merge(genotypes, SV, by="row.names")
-  colnames(tot_with_SV)<- c("individuals", "marker", "abundance")
-  tot_with_SV$counts <- tot_with_SV$abundance*10000
-  tot_with_SV$log_counts <- log10(tot_with_SV$counts+1)
-  tot_with_SV$marker<- as.factor(tot_with_SV$marker)
-  
-  my_comp <- list(c(a, b),c(a, "H"), c(b, "H"))
-  
-  fig<-ggplot(tot_with_SV, aes(x=marker, y=abundance)) + geom_boxplot(aes(fill=marker))+ 
-    stat_compare_means(comparisons = my_comp, label = "p.signif") + theme(legend.position = "none") + 
-    labs(x="Genotypes",y="Relative abundance")+ scale_fill_manual(values = cbbPalette)+
-    scale_x_discrete(limits=c(a, "H", b),labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+
-    ggtitle(paste0(taxa," abundance for marker ", marker))
-  fig <-fig + labs(caption = paste0("Mmm: ", mus_dom[,1], ", Mmd: ", mus_dom[,2]))
-  stat_box_data <- function(x, upper_limit = max(tot_with_SV$abundance) * 1.75) {
-    return( 
-      data.frame(
-        y = 0.95 * upper_limit,
-        label = paste('count =', 
-                      format(length(x), big.mark = ",", decimal.mark = ".", scientific = FALSE), 
-                      '\n',
-                      'mean =', 
-                      format(round(mean(x), 4), big.mark = ",", decimal.mark = ".", scientific = FALSE))
-      )
-    )
+genotypes_ref <- data.frame()
+for (marker in rownames(clean_geno)){
+  all_mark<- clean_geno[marker,]
+  a1 <- snps[marker, "A1"]
+  a2<- snps[marker, "A2"]
+  if (is.na(a1)|is.na(a2)){
+    tt<- table(as.factor(all_mark))
+    genotypes_ref[marker, "A1_name"]<- names(which.min(tt))
+    genotypes_ref[marker, "A1_num"]<- min(tt)
+    genotypes_ref[marker, "A2_name"]<- names(which.max(tt))
+    genotypes_ref[marker, "A2_num"]<- max(tt)
+    genotypes_ref[marker, "AA_min"]<- names(which.min(tt))
+    genotypes_ref[marker, "BB_maj"]<- names(which.max(tt))
+  } else{
+    
+    
+    tt<- table(factor(all_mark, levels=c(a1,"H", a2)))
+    
+    a1_num <- tt[a1]
+    a2_num<- tt[a2]
+    genotypes_ref[marker, "A1_name"]<- a1
+    genotypes_ref[marker, "A1_num"]<- a1_num
+    genotypes_ref[marker, "A2_name"]<- a2
+    genotypes_ref[marker, "A2_num"]<- a2_num
+    if (a1_num>a2_num){
+      genotypes_ref[marker, "AA_min"]<- names(a2_num)
+      genotypes_ref[marker, "BB_maj"]<- names(a1_num)
+    } else if (a2_num>a1_num){
+      genotypes_ref[marker, "AA_min"]<- names(a1_num)
+      genotypes_ref[marker, "BB_maj"]<- names(a2_num)
+      
+    } else if (a1_num==a2_num){
+      genotypes_ref[marker, "AA_min"]<- a1
+      genotypes_ref[marker, "BB_maj"]<-a2
+    }
   }
-  fig <-fig + 
-    stat_summary(
-      fun.data = stat_box_data, 
-      geom = "text", 
-      hjust = 0.5,
-      vjust = 0.9, size=3
-    ) 
-  fig
-  #annotate_figure(fig3, fig.lab = "GG: domesticus, AA: musculus", fig.lab.pos = "bottom.right", fig.lab.size = 12)
-  ggsave(file=paste0(taxa,"_marker_", marker,"_",DNAorRNA, ".pdf"), plot=fig)
   
-  fig2<-ggplot(tot_with_SV, aes(x=marker, y=log_counts)) + geom_boxplot(aes(fill=marker))+ 
-    stat_compare_means(comparisons = my_comp, label = "p.signif")  +theme(legend.position = "none") +
-    labs(x="Genotypes",y="Log10 transformed absolute abundance")+ scale_fill_manual(values = cbbPalette)+
-    scale_x_discrete(limits=c(a, "H", b),labels=c(paste0(a,a), paste0(a,b), paste0(b,b)))+
-    ggtitle(paste0(taxa," abundance for marker ", marker)) 
-  #annotate_figure(fig3, fig.lab = "GG: domesticus, AA: musculus", fig.lab.pos = "bottom.right", fig.lab.size = 12)
-  ggsave(file=paste0(taxa,"_marker_", marker,"_",DNAorRNA, "log.pdf"), plot=fig2)
-  return(fig)
 }
+
+genotypes_ref$marker <- rownames(genotypes_ref)
+save(genotypes_ref, file="ref_alt_min_major.Rdata")
+allP_all_minmaj<- merge(allP_all, genotypes_ref, by="marker")
+save(allP_all_minmaj, file="allP_all_minmaj.Rdata")
+
+write.csv(allP_all_minmaj, "allP_all_minmaj.csv",sep = ";" )
+
 setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Plots/Effect_plots/")
 abundance.plot("SV1", "otu", "RNA", "UNC11806630")
 abundance.plot("SV1", "otu", "RNA", "UNC8462988")
@@ -191,3 +155,84 @@ abundance.plot("G_Paraprevotella", "genus", "RNA", "UNCHS045125")
 abundance.plot("F_Prevotellaceae", "family", "RNA", "UNCHS045125")
 
 
+#### effect plots for z scores ####
+abundance.plot("SV184","otu", "RNA","UNC7414459")
+abundance.plot("SV184","otu", "RNA","UNC26145702")
+# only one dom ~ 0 dom.t=0.19
+effect.violin.plot("SV91","otu", "RNA","UNCHS043099")
+effect.boxplot("SV91","otu", "RNA","UNCHS043099")
+# dom.T =-0.81
+effect.violin.plot("unclassified_C_Deltaproteobacteria", "genus", "RNA", "UNC26246433")
+abundance.plot("unclassified_C_Deltaproteobacteria", "genus", "RNA", "UNC26246433")
+
+# add.T = 0.36
+effect.violin.plot("SV264", "otu", "RNA", "UNCHS047355")
+
+# degree of dominance -0.41, add.T=6.5, dom.T=-2.5
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNC6440308")
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNCJPD001537")
+
+
+# 
+effect.violin.plot("G_Odoribacter", "genus", "RNA", "JAX00260563")
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNC6440308")
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "JAX00499850")
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "RNA", "UNC6454815")
+effect.violin.plot("SV52", "otu", "RNA", "JAX00260563")
+effect.violin.plot("G_Odoribacter", "genus", "RNA", "UNC6535447")
+effect.violin.plot("G_Odoribacter", "genus", "RNA", "UNC6535901")
+effect.violin.plot("SV142", "otu", "DNA", "UNC7121581")
+effect.violin.plot("unclassified_C_Deltaproteobacteria", "genus", "RNA", "UNC26246433")
+effect.violin.plot("G_Eisenbergiella", "genus", "RNA", "ICR1886")
+effect.violin.plot("SV264", "otu", "RNA", "UNCHS047355")
+effect.violin.plot("SV91", "otu", "RNA", "UNCHS043099")
+effect.violin.plot("SV91", "otu", "RNA", "UNCHS011150")
+effect.violin.plot("SV264", "otu", "RNA", "UNC20743110")
+effect.violin.plot("SV145", "otu", "DNA", "JAX00214148")
+effect.violin.plot("SV145", "otu", "DNA", "UNCJPD008271")
+effect.violin.plot("SV17", "otu", "DNA", "UNCJPD001371")
+effect.violin.plot("SV142", "otu", "DNA", "UNCJPD001666")
+effect.violin.plot("SV142", "otu", "RNA", "UNCJPD001666")
+effect.violin.plot("SV49", "otu", "RNA", "UNC2393187")
+
+#### Maj > H > min
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNC6440308")
+effect.boxplot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNC6440308")
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNCJPD001537")
+effect.boxplot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "UNCJPD001537")
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "JAX00499850")
+effect.boxplot("unclassified_F_Porphyromonadaceae", "genus", "DNA", "JAX00499850")
+effect.violin.plot("unclassified_F_Porphyromonadaceae", "genus", "RNA", "UNC26246433")
+effect.boxplot("unclassified_F_Porphyromonadaceae", "genus", "RNA", "UNC26246433")
+# Maj > H > min deg~0
+effect.violin.plot("SV91", "otu", "RNA", "UNCHS043099")
+effect.boxplot("SV91", "otu", "RNA", "UNCHS043099")
+
+#min >H>maj
+effect.violin.plot("SV264", "otu", "RNA", "UNC20743110")
+effect.boxplot("SV264", "otu", "RNA", "UNC20743110")
+effect.violin.plot("SV21", "otu", "DNA", "JAX00277190")
+effect.boxplot("SV21", "otu", "DNA", "JAX00277190")
+effect.violin.plot("SV7", "otu", "DNA", "UNCHS014190")
+effect.boxplot("SV7", "otu", "DNA", "UNCHS014190")
+effect.violin.plot("C_Bacilli", "class", "DNA", "UNC29132165")
+effect.boxplot("C_Bacilli", "class", "DNA", "UNC29132165")
+effect.violin.plot("C_Deferribacteres", "class", "DNA", "UNC10048917")
+effect.boxplot("C_Deferribacteres", "class", "DNA", "UNC10048917")
+effect.violin.plot("O_Bacillales", "order", "DNA", "UNC20972762")
+effect.boxplot("O_Bacillales", "order", "DNA", "UNC20972762")
+
+#min > maj > H
+effect.violin.plot("G_Lactobacillus", "genus", "RNA", "UNC11691749")
+effect.boxplot("G_Lactobacillus", "genus", "RNA", "UNC11691749")
+effect.violin.plot("SV7", "otu", "DNA", "JAX00312557")
+effect.boxplot("SV7", "otu", "DNA", "JAX00312557")
+#JAX00028034
+effect.violin.plot("G_Dorea", "genus", "RNA", "JAX00028034")
+effect.boxplot("G_Dorea", "genus", "RNA", "JAX00028034")
+effect.violin.plot("G_Dorea", "genus", "DNA", "JAX00028034")
+effect.boxplot("G_Dorea", "genus", "DNA", "JAX00028034")
+effect.violin.plot("SV184", "otu", "RNA", "JAX00028034")
+effect.boxplot("SV184", "otu", "RNA", "JAX00028034")
+effect.violin.plot("SV293", "otu", "RNA", "JAX00028034")
+effect.boxplot("SV293", "otu", "RNA", "JAX00028034")

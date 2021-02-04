@@ -108,7 +108,7 @@ for (chr in 1:19){
 
   # select markers from chromosome
   marker_chr <- snps[which(snps$chr==chr),1]
-  gts<-add.mat[,marker_chr]
+  gts<-add.mat[individuals,marker_chr]
   sub<-colnames(gts)[colMeans(gts,na.rm=T)/2>0.025 & colMeans(gts,na.rm=T)/2<0.975 & is.na(colMeans(gts,na.rm=T))==F]
   gts<-gts[,sub]
   # prepare output dataframe
@@ -124,7 +124,8 @@ for (chr in 1:19){
   
   # Run model for each snp on chromosome
   system.time(f<-mclapply(as.list(sub), function(snp){
-    df<-data.frame(lmm.data,ad=gts[,snp],dom=dom.mat[,snp],gt=geno[,snp])
+    df<-data.frame(lmm.data,ad=gts[individuals,snp],
+                   dom=dom.mat[individuals,snp],gt=geno[individuals,snp])
     df<-df[is.na(df$ad)==F & is.na(df$tax)==F &is.na(df$gt)==F & is.na(df$dom)==F,]
     if (nrow(df)!=size){
       null_model <- relmatLmer(tax ~  (1|id), df,relmat=list(id=kinship))
