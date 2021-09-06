@@ -7,20 +7,23 @@
   require(patchwork)
   require(tidyverse)
   
+  
   ### Set PATH so that the system command can use bioconda installed packages
   # Sys.setenv (PATH=paste(Sys.getenv("PATH"), "/Users/turner/miniconda3/bin", sep=":"))
   
   # Biomarts
-  snp.ensembl <- useEnsembl(biomart = "snp", dataset="mmusculus_snp", mirror="www")
-  gene.ensembl <- useEnsembl(biomart = "ensembl", dataset = "mmusculus_gene_ensembl", mirror = 'www') 
+  snp.ensembl <- useEnsembl(biomart = "snp", dataset="mmusculus_snp", version=102)
+  gene.ensembl <- useEnsembl(biomart = "ensembl", dataset = "mmusculus_gene_ensembl", version=102) 
   
   #INPUTS##
   #list of traits mapped - match folder names - the one specified here has list of traits then dummy column
-  trait_list <- read_csv2("~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/trait.list.csv")
+  #trait_list <- read_csv2("~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/trait.list.dna2.csv")
+  trait_list <- read_delim("~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/trait.list.rna.csv", delim=";")
+  
   Xtrue = T
   #folder that has a results folder for each trait
+  #results.folder="~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/"
   results.folder="~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/"
-  
   #make output folder for sig summaries
   output.folder=paste0(results.folder,"sig.summaries/")
   dir.create(output.folder, showWarnings = FALSE)
@@ -33,11 +36,7 @@
     # if RNA otu: SV9 is all 0 --> skip
     # tax_list=tax_list[-8,1]
     # tax_list=tax_list[-73,1]
-    all_results<- data.frame(trait="",P.type="",sig.type="",chr="",chr.num="",chr_bin="",length="",start.LD.pos="",stop.LD.pos="",sig.snps="",
-                             peak.snp="",rsId="",peak.pos="",peak.P.type="",add.Beta_peak_snp="",add.StdErr_peak_snp="",add.Zscore_peak_snp="",
-                             add.P_peak_snp="",dom.Beta_peak_snp="",dom.StdErr_peak_snp="",dom.Zscore_peak_snp="",dom.P_peak_snp="",markers="",
-                             closest_gene="",closest_gene_type="",closest_gene_description="",total_genes="",list_total_genes="",
-                             total_protein_coding_genes="",list_protein_coding_genes="")
+
 
     for (j in 1:nrow(tax_list)){
   gws=as.character(tax_list[j,1])
@@ -260,7 +259,7 @@ rownames(sig.intervals.comb)=1:nrow(sig.intervals.comb)
   }
   sig.intervals.out=cbind(sig.intervals.comb,sig.intervals.annot)
   ####reorder the columns
-  sig.intervals.out$length<- (sig.intervals.out$stop.LD.pos-sig.intervals.out$start.LD.pos)/1e6 
+  sig.intervals.out$length<- (sig.intervals.out$stop.LD.pos-sig.intervals.out$start.LD.pos)
   keep.cols=c("trait","P.type","sig.type","chr","chr.num","chr_bin","length","start.LD.pos","stop.LD.pos","sig.snps","peak.snp","rsId","peak.pos","peak.P.type","add.Beta_peak_snp","add.StdErr_peak_snp","add.Zscore_peak_snp","add.P_peak_snp","dom.Beta_peak_snp","dom.StdErr_peak_snp","dom.Zscore_peak_snp","dom.P_peak_snp","markers","closest_gene","closest_gene_type","closest_gene_description","total_genes","list_total_genes","total_protein_coding_genes","list_protein_coding_genes")
   sig.intervals.out=sig.intervals.out[,keep.cols]
   #rename some columns
@@ -268,16 +267,14 @@ rownames(sig.intervals.comb)=1:nrow(sig.intervals.comb)
   # colnames(sig.intervals.out[,"stop.LD.pos"])="stop"
   # colnames(sig.intervals.out[,"peak.P.type"])="peak.Pval"
   ####write output
-  write_csv2(sig.intervals.out,file=paste(trait, "/",gws,"_gwscan_sigIntervals.annot_",sig.type,".csv",sep=""))
-  all_results<- rbind(all_results, sig.intervals.out)
+  write.csv(sig.intervals.out,file=paste(trait, "/",gws,"_gwscan_sigIntervals.annot_",sig.type,".csv",sep=""))
+
   rm(list = ls()[grep(gws, ls())])
   }
 
   
     }
-    all_results<- all_results[-1,]
-    write_csv2(all_results, file=paste0(trait, "_allresults.csv"))
-    save(all_results, file = paste0(trait, "all_results.Rdata"))
+
   }
   
   

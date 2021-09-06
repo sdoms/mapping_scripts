@@ -1,0 +1,13 @@
+"","Kingdom","Phylum","Class","Order","Family","Genus"
+"SV1","K_Bacteria","P_Proteobacteria","C_Epsilonproteobacteria","O_Campylobacterales","F_Helicobacteraceae",NA
+"SV4","K_Bacteria","P_Firmicutes","C_Bacilli","O_Lactobacillales","F_Lactobacillaceae",NA
+"SV5","K_Bacteria","P_Firmicutes","C_Clostridia","O_Clostridiales","F_Lachnospiraceae",NA
+"SV6","K_Bacteria","P_Deferribacteres","C_Deferribacteres","O_Deferribacterales","F_Deferribacteraceae",NA
+"SV7","K_Bacteria","P_Bacteroidetes","C_Bacteroidia","O_Bacteroidales","F_Prevotellaceae",NA
+"SV9","K_Bacteria","P_Firmicutes","C_Bacilli","O_Bacillales","F_Staphylococcaceae",NA
+"SV19","K_Bacteria","P_Bacteroidetes","C_Bacteroidia","O_Bacteroidales","F_Bacteroidaceae",NA
+"SV21","K_Bacteria","P_Bacteroidetes","C_Bacteroidia","O_Bacteroidales","F_Rikenellaceae",NA
+"SV26","K_Bacteria","P_Firmicutes","C_Clostridia","O_Clostridiales","F_Ruminococcaceae",NA
+"SV53","K_Bacteria","P_Bacteroidetes","C_Bacteroidia","O_Bacteroidales","unclassified_O_Bacteroidales",NA
+"SV95","K_Bacteria","P_Bacteroidetes","C_Bacteroidia","O_Bacteroidales","F_Porphyromonadaceae",NA
+"SV124","K_Bacteria","P_Firmicutes","C_Clostridia","O_Clostridiales","unclassified_O_Clostridiales",NA

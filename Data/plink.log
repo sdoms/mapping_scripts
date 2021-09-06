@@ -1,0 +1,29 @@
+PLINK v1.90b5.3 64-bit (21 Feb 2018)
+Options in effect:
+  --allow-extra-chr
+  --bfile /Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/hybrid_f2_5
+  --ld-snp UNC26823632
+  --ld-window 99999
+  --ld-window-kb 10000
+  --ld-window-r2 0
+  --r2
+
+Hostname: evolgen210.fritz.box
+Working directory: /Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Scripts
+Start time: Tue Feb  9 16:15:48 2021
+
+Random number seed: 1612883748
+16384 MB RAM detected; reserving 8192 MB for main workspace.
+64103 variants loaded from .bim file.
+320 people (320 males, 0 females) loaded from .fam.
+Using up to 8 threads (change this with --threads).
+Before main variant filters, 320 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Warning: 5563 het. haploid genotypes present (see plink.hh ); many commands
+treat these as missing.
+Total genotyping rate is 0.997068.
+64103 variants and 320 people pass filters and QC.
+Note: No phenotypes present.
+--r2 to plink.ld ... done.
+
+End time: Tue Feb  9 16:15:48 2021

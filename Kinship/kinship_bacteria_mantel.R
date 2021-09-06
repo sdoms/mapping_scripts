@@ -1,4 +1,8 @@
 gemma <-"/usr/local/bin/gemma"
+
+library(argyle)
+setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/snp_heritability/kinship_microbes/")
+
 cat("Reading map file.\n")
 load("~/Documents/PhD/Experiments/Final_QTL_mapping/Cleaning_snps/clean_snps.Rdata")
 snps$cM <- NULL
@@ -8,10 +12,12 @@ snps$pos <- snps$pos * 10e5
 analysis <- "otu"
 DNAorRNA <- "DNA"
 
-taxa <- read.pheno(paste0("../../Phenotyping_27.02.2020/tables_core/",analysis,"_table_f2_core.csv"))
-# 
+taxa <- read.csv(paste0("../../../Phenotyping_27.02.2020/tables_core/",analysis,"_table_f2_core.csv"))
+rownames(taxa)<- taxa$X# 
+taxa$X<- NULL
 taxa <- taxa[which(grepl(paste0("_",DNAorRNA),rownames(taxa))),] # only do the DNA
 rownames(taxa) <- substr(rownames(taxa), 1,15) # remove the _DNA
+
 
 # pheno table 
 write.table(data.frame(rownames(taxa),1),"pheno.txt", quote=F, row.names=F, col.names=F)
@@ -33,7 +39,7 @@ rownames(kinship_DNA_micro)<- colnames(gts)[-c(1,2,3)]
 colnames(kinship_DNA_micro)<- colnames(gts)[-c(1,2,3)]
 
 # genotype kinship
-F2 <- read.plink("../../Cleaning_snps/clean_f2")
+F2 <- read.plink("../../../Cleaning_snps/clean_f2")
 F2 <- recode(F2, "relative")
 
 colnames(F2) <- gsub(x = colnames(F2), pattern = "\\/", replacement = ".")  
@@ -46,7 +52,7 @@ individuals <- ncol(F2)
 F2_part <- apply(F2[,7:individuals], 2, as.numeric)# make sure that the genotype information(0,1,2) is numeric
 
 F2_part <- F2_part[,colnames(F2_part) %in% ind]
-
+map<- snps
 F2 <- cbind(map[,c(1,5,6)],F2_part)
 
 write.table(F2,"geno.txt",sep = " ",quote = FALSE,row.names = FALSE,
@@ -59,11 +65,13 @@ write.table(F2,"geno.txt",sep = " ",quote = FALSE,row.names = FALSE,
 system(paste(gemma, "-g geno.txt -gk 1 -p pheno.txt -debug -o kinship_DNA" ))
 
 # load kinship matrix geno
-kinship_DNA <- read.table("kinship_DNA.cXX.txt")
+kinship_DNA <- read.table("../kinship_DNA.cXX.txt")
 rownames(kinship_DNA)<- colnames(F2)[-c(1:3)]
 colnames(kinship_DNA)<- colnames(F2)[-c(1:3)]
 
 rownames(kinship_DNA)==rownames(kinship_DNA_micro)
+
+
 # make sure in right order
 kinship_DNA2 <- arrange(kinship_DNA,rownames(kinship_DNA))
 kinship_DNA2<- kinship_DNA2[,rownames(kinship_DNA2)]
@@ -94,11 +102,14 @@ beta <- as.matrix(vegdist(taxa))
 meltTT$fid <- substr(meltTT$id1, 1,7)
 rownames(beta)==rownames(kinship_DNA2)
 mantel(kinship_DNA2,beta,method="spearman", permutations = 9999)
-
+###### RNA #####
 DNAorRNA <- "RNA"
 
-taxa <- read.pheno(paste0("../../Phenotyping_27.02.2020/tables_core/",analysis,"_table_f2_core.csv"))
+taxa <- read.csv(paste0("../../../Phenotyping_27.02.2020/tables_core/",analysis,"_table_f2_core.csv"))
 # 
+rownames(taxa)<- taxa$X# 
+taxa$X<- NULL
+
 taxa <- taxa[which(grepl(paste0("_",DNAorRNA),rownames(taxa))),] # only do the DNA
 rownames(taxa) <- substr(rownames(taxa), 1,15) # remove the _DNA
 
@@ -117,7 +128,7 @@ write.table(gts,"kinship_taxa.txt",sep = " ",quote = FALSE,row.names = FALSE,
 system(paste0(gemma, " -g kinship_taxa.txt -gk 1 -p pheno.txt -debug -outdir kinship_microbes -notsnp"))
 
 # genotype kinship
-F2 <- read.plink("../../Cleaning_snps/clean_f2")
+F2 <- read.plink("../../../Cleaning_snps/clean_f2")
 F2 <- recode(F2, "relative")
 
 colnames(F2) <- gsub(x = colnames(F2), pattern = "\\/", replacement = ".")  
@@ -126,6 +137,8 @@ colnames(F2) <- gsub(x = colnames(F2), pattern = "\\/", replacement = ".")
 F2 <- as.matrix(as.data.frame(F2))
 individuals <- ncol(F2)
 F2_part <- apply(F2[,7:individuals], 2, as.numeric)# make sure that the genotype information(0,1,2) is numeric
+
+ind <- rownames(taxa)
 
 F2_part <- F2_part[,colnames(F2_part) %in% ind]
 
@@ -142,7 +155,7 @@ kinship_RNA_micro <- read.table("kinship_microbes/result.cXX.txt")
 rownames(kinship_RNA_micro)<- colnames(gts)[-c(1,2,3)]
 colnames(kinship_RNA_micro)<- colnames(gts)[-c(1,2,3)]
 # load kinship matrix geno
-kinship_RNA <- read.table("kinship_RNA.cXX.txt")
+kinship_RNA <- read.table("../kinship_RNA.cXX.txt")
 rownames(kinship_RNA)<- colnames(F2)[-c(1:6)]
 colnames(kinship_RNA)<- colnames(F2)[-c(1:6)]
 
@@ -180,5 +193,68 @@ meltTT2 <- merge(meltKK, meltMM_DNA, by="id")
 colnames(meltTT2)<- c("id", "idgeno1", "idgeno2","geno_kinship", "idmicro1", "idmicro2", "geno_micro")
 ggplot(data=meltTT2, aes(y=geno_micro, x=geno_kinship))+geom_point(shape=1)  +  geom_smooth(method=lm,   # Add linear regression line
                                                                                            se=FALSE) +   # Don't add shaded confidence region
+  theme_test()+labs(y="Microbiome-based kinship",x= "Host genotype kinship")+annotate("text",label= paste("Mantel test: p=",m$signif),x=0.2,y=0.0075)
+
+
+
+######## based on beta diversity #####
+# beta diversity 
+library(vegan)
+bray <- as.matrix(vegdist(taxa))
+rownames(kinship_DNA)==rownames(bray)
+kinship_DNA2 <- kinship_DNA[rownames(bray), colnames(bray)]
+rownames(kinship_DNA2)==rownames(bray)
+colnames(kinship_DNA2)==colnames(bray)
+
+mantel_bray_DNA<-mantel(kinship_DNA2,bray,method="spearman", permutations = 9999)
+
+jaccard <- as.matrix(vegdist(taxa, method = "jaccard", binary = T))
+rownames(kinship_DNA)==rownames(jaccard)
+kinship_DNA2 <- kinship_DNA[rownames(jaccard), colnames(jaccard)]
+rownames(kinship_DNA2)==rownames(jaccard)
+colnames(kinship_DNA2)==colnames(jaccard)
+
+mantel_jac_DNA<-mantel(kinship_DNA2,jaccard,method="spearman", permutations = 9999)
+## RNA
+bray <- as.matrix(vegdist(taxa))
+rownames(kinship_RNA)==rownames(bray)
+kinship_RNA2 <- kinship_RNA[rownames(bray), colnames(bray)]
+rownames(kinship_RNA2)==rownames(bray)
+colnames(kinship_RNA2)==colnames(bray)
+
+mantel_bray_RNA<-mantel(kinship_RNA2,bray,method="spearman", permutations = 9999)
+
+jaccard <- as.matrix(vegdist(taxa, method = "jaccard", binary = T))
+rownames(kinship_RNA)==rownames(jaccard)
+kinship_RNA2 <- kinship_RNA[rownames(jaccard), colnames(jaccard)]
+rownames(kinship_RNA2)==rownames(jaccard)
+colnames(kinship_RNA2)==colnames(jaccard)
+
+mantel_jac_RNA<-mantel(kinship_RNA2,jaccard,method="spearman", permutations = 9999)
+
+
+library(ggplot2)
+library(ggpubr)
+
+meltKK <- reshape2::melt(cbind(rownames(kinship_RNA2),kinship_RNA2))
+meltMM <- reshape2::melt(cbind(rownames(bray),bray))
+meltMM$id <- paste0(meltMM$Var1,"_",meltMM$Var2)
+meltKK$id <- paste0(meltKK$`rownames(kinship_RNA2)`,"_",meltKK$variable)
+meltTT <- merge(meltKK, meltMM, by="id")
+colnames(meltTT)<- c("id", "idgeno1", "idgeno2","geno_kinship", "idmicro1", "idmicro2", "geno_micro")
+g_RNA <- ggplot(data=meltTT, aes(y=geno_micro, x=geno_kinship))+geom_point(shape=1)  +  geom_smooth(method=lm,   # Add linear regression line
+                                                                                                    se=FALSE) +   # Don't add shaded confidence region
+  theme_test()+labs(y="Microbiome-based kinship",x= "Host genotype kinship")+annotate("text",label= paste("Mantel test: p=",m$signif),x=0.2,y=0.0075)
+
+g_RNA
+
+g_DNA +g_RNA +plot_annotation(tag_levels = "A")
+ggsave("kinship_geno_micro_mantel.pdf")
+
+melt_tot <- merge(meltTT, meltTT_DNA, by="id", all.x=T)
+meltTT2 <- merge(meltKK, meltMM_DNA, by="id")
+colnames(meltTT2)<- c("id", "idgeno1", "idgeno2","geno_kinship", "idmicro1", "idmicro2", "geno_micro")
+ggplot(data=meltTT2, aes(y=geno_micro, x=geno_kinship))+geom_point(shape=1)  +  geom_smooth(method=lm,   # Add linear regression line
+                                                                                            se=FALSE) +   # Don't add shaded confidence region
   theme_test()+labs(y="Microbiome-based kinship",x= "Host genotype kinship")+annotate("text",label= paste("Mantel test: p=",m$signif),x=0.2,y=0.0075)
 
