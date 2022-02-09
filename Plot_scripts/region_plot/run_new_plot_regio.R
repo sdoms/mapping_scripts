@@ -1,4 +1,4 @@
-source('~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Plot_scripts/plot_region.R')
+source('~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Plot_scripts/region_plot/plot_region.R')
 require(biomaRt)
 gene.ensembl <- useEnsembl(biomart = "ensembl", dataset = "mmusculus_gene_ensembl", version=102) # can take long
 # load("/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/all_genes_intervals/SW/genes_DNA_RNA_intervals_SW.Rdata")
@@ -15,4 +15,7 @@ for (i in 1:nrow(all_dna_rna_SW)){
 }
 
 # plot.region(trait = "SV184", tax_level = "otu",chr = 4, start = 67067748,stop = 72515350,peak_snp = "UNC7414459", P="add.P", dnaorrna = "RNA",outputdir = "~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_new_fig_DNA_RNA/", gene.ensembl)
-# plot.region(trait = "SV184", tax_level = "otu",chr = 15, start = 94362391,stop = 94362391,peak_snp = "UNC26145702", P="add.P", dnaorrna = "RNA",outputdir = "~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_new_fig_DNA_RNA/", gene.ensembl)
+plot.region(trait = "unclassified_C_Deltaproteobacteria", tax_level = "genus",chr = 17, start = 57203900,
+            stop = 57228200,peak_snp = "UNCrs107949177", P="add.P", dnaorrna = "RNA",
+            outputdir = "~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_new_fig_DNA_RNA/", 
+            gene.ensembl)

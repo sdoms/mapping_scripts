@@ -2,8 +2,8 @@ setwd("/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial
 load("../../../../../Cleaning_snps/clean_snps.Rdata")
 
 #load("genes_DNA_RNA_intervals_SW.Rdata")
-load(file="/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_02032021_GW.Rdata")
-load("/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_03032021_SW.Rdata")
+#load(file="/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_02032021_GW.Rdata")
+load("/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_18032021_SW.Rdata")
 
 # system("~/poverlap/poverlap2.py poverlap --a all_intervals_mouse_studies_10mb.txt --b my_intervals_DNA_RNA_10mb.txt -g mouse.mm10.genome --n 9999")
 # system("bedtools intersect -wo -a all_intervals_mouse_studies_10mb.txt -b my_intervals_DNA_RNA_10mb.txt >bed_intersect_out.txt")
@@ -80,7 +80,7 @@ snp_plot <- ggplot()+
   coord_flip() + scale_color_viridis_c(option="magma", direction = -1, limits=c(0,30)) + 
   labs(y="Position (Mb)", x= "Chromosome", color="Overlap count") +theme_test()
 interval_plot<-snp_plot + scale_x_discrete(limits=factor(goodChrOrder))
-interval_plot
+interval_plot <-interval_plot + theme(text = element_text(size=12))
 ggsave("intervals_DNA_RNA_plot_SW.pdf")
 # study-wide
 SW_threshold =0.05/32625/118.2177
@@ -97,8 +97,8 @@ un_marker<- unique(all_dna_rna$peak.snp)
 ### combine with plot from density_results_snps.R
 load("../../all_genes_snps/snp_plot.Rdata")
 library(patchwork)
-interval_plot+snp_plot + plot_annotation(tag_levels = "A")
-ggsave("../density_results_intervalsANDsnps.pdf")
+interval_plot/snp_plot + plot_annotation(tag_levels = "A")
+ggsave("../density_results_intervalsANDsnps.pdf", height=12)
 
 
 

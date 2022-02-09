@@ -1,10 +1,8 @@
-Genetic mapping of host loci influencing gut microbiome composition in
-hybrid mice
+Key features of the genetic architecture and evolution of host-microbe interactions revealed by high-resolution genetic mapping of the mucosa-associated gut microbiome in hybrid mice
 ================
 
-This github repository contains the original code from the article
-“Genetic mapping of host loci influencing gut microbiome composition in
-hybrid mice” published in …
+This github repository contains the original code from the article 
+“Key features of the genetic architecture and evolution of host-microbe interactions revealed by high-resolution genetic mapping of the mucosa-associated gut microbiome in hybrid mice” (https://www.biorxiv.org/content/10.1101/2021.09.28.462095v3).
 
 # Data
 
@@ -13,27 +11,45 @@ abundance tables). The genotypes folder contains the raw genotypes
 (all\_genotypes\_all\_samples.Rdata), the pre-LD-filtered SNPs
 “hybrid\_f2\_5”, and the cleaned genotypes “clean\_f2”.
 
-# Cleaning
-
+# 1. Cleaning
+First, we start with a quality control of the genotype data. 
 Script 1\_cleaning\_snps.R uses Argyle R package and PLINK to clean the
-genotype data. Script 2\_consensus\_F0.R calculates the consensus in the
+genotype data. 
+We remove:
+* Non-biallelic SNPs
+* Individuals and SNPs with high levels of missingness (>0.1)
+* SNPs with low MAF frequency (<0.05)
+* SNPs out of Hardy-Weinberg equilibrium (P<.00001)
+* SNPs pairwise LD > 0.9 in a window size of 5 SNPs by SNP
+
+Script 2\_consensus\_F0.R calculates the consensus in the
 G0 generation.
 
-# Kinship
 
-Using GEMMA to calculate kinship matrices.
+# 2. Heritability
+The script snp_heritability_lme4qtl.R uses GEMMA to calculate a kinship matrix and will then use lme4QTL to calculate the SNP-based heritability estimates and make the plot (Fig. 1 A-B). 
+"cospec_vs_herit.R" combines the SNP-based heritability estimates with the cospeciation rates calculates by Groussin et al (2017) to make Fig 1C-D.  
 
-# Heritability
 
-Calculation of the heritability estimates and the correlation with the
-cospeciation rates by Groussin et al. 2017.
-
-# Association mapping
+# 3. Association mapping
 
 Folder ’Run\_script" contains separate scripts for the autosomes and the
-X chromosome.
+X chromosome. This script takes the phenotypes and genotypes as input. The taxa abundances are first inverse.logit transformed. 
+GEMMA is used for calculating kinship matrices using the leave-one-chromosome-out approach.  
+Using the lme4QTl R package, we calculate a null model with the mating pair and the kinship matrix as random effects and a snp model that has the additive and the dominance effect of the SNP. We use an anova test to determine the significance. 
 
-# Plotting
+# 4. Summary Tables
+gwascanSummaries.R combines SNPs within 10Mb from each other into single
+regions and expands those regions with SNPs in LD (>0.9). It then
+uses biomart and mm10 mouse genome to determine the genes within those
+intervals.
+
+# 5. Enrichment analysis
+
+Enrichment analysis of the genes closest to the significant SNPs using
+the clusterProfiler R package.
+
+# 6. Plotting
 
 ## Manhattan plots
 
@@ -48,7 +64,7 @@ To make region plots run the run\_pretty\_region\_plot.R script. It
 calls the New\_pretty\_plot\_script.R. New\_pretty\_plot.R first
 calculates the confidence interval calculating the pairwise LD to the
 peak SNP and takes the positions from the two outer SNPs, that are in
-LD&gt;0.9 with the peak SNP, as the borders. It then uses biomart to
+LD>0.9 with the peak SNP, as the borders. It then uses biomart to
 find the genes in the interval and plot this in a locuszoom-like manner.
 At the end, it will write a result file for the trait with the
 information about the significant regions.
@@ -73,31 +89,21 @@ This folder contains scripts to plot the results on a karyotype like
 plot to visualize the density of genomic regions associated with
 bacterial traits.
 
-# Percentage of variance explained (PVE)
+# 7. Other 
+
+## Percentage of variance explained (PVE)
 
 PVE\_SNP\_model.R shows how to calculate to PVE of each SNP using a
 model and PVE\_snp.R using a formula.
 
-# matSpDLite
+## matSpDLite
 
 This script uses matSpDLite
 (<http://gump.qimr.edu.au/general/daleN/matSpDlite/>) from Nyholt DR
 (2004) to calculate the number of independent taxa tested in order to
 calculate a study-wide significance threshold.
 
-# Summary Tables
-
-gwascanSummaries.R combines SNPs within 10Mb from each other into single
-regions and expands those regions with SNPs in LD (&gt;0.9). It then
-uses biomart and mm10 mouse genome to determine the genes within those
-intervals.
-
-# Enrichment
-
-Enrichment analysis of the genes closest to the significant SNPs using
-the clusterProfiler R package.
-
-# Genes
+## Genes
 
 Calculate the overlap of genes/regions with other studies using
 poverlap.

@@ -46,7 +46,7 @@ snp_plot <- ggplot()+
                aes(x=chr, xend=chr, y=start, yend=end, color=Freq), size=4)+
   coord_flip() + scale_color_viridis(option="magma", direction = -1) + 
   labs(y="Position (Mb)", x= "Chromosome", color="Times SNP significant") +theme_test()
-snp_plot<-snp_plot + scale_x_discrete(limits=goodChrOrder)
+snp_plot<-snp_plot + scale_x_discrete(limits=goodChrOrder)+ theme(text = element_text(size=12))
 snp_plot
 ggsave("SNP_density_results_SW.pdf")
 save(snp_plot, file="snp_plot.Rdata")

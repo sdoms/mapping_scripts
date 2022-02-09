@@ -13,10 +13,10 @@ plot.region <- function(trait,tax_level, chr, start, stop, peak_snp,P="P",dnaorr
   require(ggsci)
   begin <- as.numeric(as.character(start))
   end<- as.numeric(as.character(stop))
-  load("~/Documents/PhD/Experiments/QTL_mapping_results/Genotype_data/GM_snps.Rdata")
+  load("~/Documents/PhD/Experiments/Final_QTL_mapping/Genotype_data/GM_snps.Rdata")
   gwscan<- readRDS(paste0("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/", dnaorrna, 
                           "/",tax_level,"/",trait, "_chr_", chr, "with_add_dom.rds"))
-  system(paste0("plink --bfile ~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/hybrid_f2_5 -r2 --ld-snp ",
+  system(paste0("plink --bfile ~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Data/genotypes/hybrid_f2_5 -r2 --ld-snp ",
                 peak_snp," --ld-window-kb 10000 --ld-window-r2 0 --ld-window 99999 --allow-extra-chr"))
   ld_set <- read.table("plink.ld", header=T)
   ss <- GM_snps  %>% dplyr::filter(between(pos*1e6, start-10, stop+10)) # GM snps is sometimes rounded to 1e5
