@@ -2,7 +2,7 @@ Key features of the genetic architecture and evolution of host-microbe interacti
 ================
 
 This github repository contains the original code from the article
-“Key features of the genetic architecture and evolution of host-microbe interactions revealed by high-resolution genetic mapping of the mucosa-associated gut microbiome in hybrid mice” (https://www.biorxiv.org/content/10.1101/2021.09.28.462095v3).
+“Key features of the genetic architecture and evolution of host-microbe interactions revealed by high-resolution genetic mapping of the mucosa-associated gut microbiome in hybrid mice” (https://www.biorxiv.org/content/10.1101/2021.09.28.462095v3). This code repository aims to provide inspiration to conduct a similar GWAS analysis. Feel free to contact me when you are having questions by email (doms@evolbio.mpg.de) or through github.
 
 # Data
 
@@ -13,7 +13,7 @@ abundance tables). The genotypes folder contains the raw genotypes
 
 # 1. Cleaning
 First, we start with a quality control of the genotype data.
-Script 1\_cleaning\_snps.R uses Argyle R package and PLINK to clean the
+Script *1\_cleaning\_snps.R* uses Argyle R package and PLINK to clean the
 genotype data.
 We remove:
 * Non-biallelic SNPs
@@ -22,14 +22,14 @@ We remove:
 * SNPs out of Hardy-Weinberg equilibrium (P<.00001)
 * SNPs pairwise LD > 0.9 in a window size of 5 SNPs by SNP
 
-Script 2\_consensus\_F0.R calculates the consensus in the
+Script *2\_consensus\_F0.R* calculates the consensus in the
 G0 generation.
 
 
 # 2. Heritability
-The script snp_heritability_lme4qtl.R uses GEMMA to calculate a kinship matrix and will then use lme4QTL to calculate the SNP-based heritability estimates and make the plot (Fig. 1 A-B).
-"function_for_gemma.r" contains code snippets to load/write data frames correctly for GEMMA. Code originates from Pallares et al (2015): https://doi.org/10.1371/journal.pgen.1005607
-"cospec_vs_herit.R" combines the SNP-based heritability estimates with the cospeciation rates calculates by Groussin et al (2017) to make Fig 1C-D.
+* The script snp_heritability_lme4qtl.R uses GEMMA to calculate a kinship matrix and will then use lme4QTL to calculate the SNP-based heritability estimates and make the plot (Fig. 1 A-B).
+* *function_for_gemma.r* contains code snippets to load/write data frames correctly for GEMMA. Code originates from Pallares et al (2015): https://doi.org/10.1371/journal.pgen.1005607
+* *cospec_vs_herit.R* combines the SNP-based heritability estimates with the cospeciation rates calculates by Groussin et al (2017) to make Fig 1C-D.
 
 
 # 3. Association mapping
