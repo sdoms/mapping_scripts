@@ -1,6 +1,6 @@
-setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/")
-load("../all_DNA_RNA_18032021_SW.Rdata")
-
+setwd("~/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/")
+# load("../all_DNA_RNA_18032021_SW.Rdata")
+load("../all_DNA_RNA_22022022_SW_pval_corr.Rdata")
 library(tidyverse)
 piece <- all_dna_rna_SW %>% 
   mutate(length=stop.LD.pos-start.LD.pos) %>% 
@@ -13,7 +13,7 @@ ex_dist <- piece %>%
   distinct(chr, peak.pos,  .keep_all=T) %>% arrange(length) %>% 
   dplyr::select(taxa, length, chr, peak.pos,markers, list_protein_coding_genes, list_total_genes, closest_gene, closest_gene_type, closest_gene_description) %>% 
   ungroup()
-write_delim(ex_dist, "genes_1Mb_intervals.csv", delim=";" )
+write_delim(ex_dist, "genes_1Mb_intervals_pval_corr.csv", delim=";" )
 
 library(VariantAnnotation)
 library(org.Mm.eg.db)
@@ -133,5 +133,5 @@ for (n in 1:nrow(final_out)){
   all_tax<- unique(trimws(unlist(str_split(final_out$taxa[n], "\\|"))))
   final_out$taxa[n] <- paste(all_tax, collapse = " | ")
 }
-write_delim(final_out, "genes_1Mb_intervals_closest_genes.csv", delim=";" )
+write_delim(final_out, "genes_1Mb_intervals_closest_genes_pval_corr.csv", delim=";" )
 

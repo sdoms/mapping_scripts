@@ -1,13 +1,15 @@
-setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/")
+setwd("~/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/")
 library(tidyverse)
-load("/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/sig.summaries/all_DNA.Rdata")
+# load("/Users/doms/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/sig.summaries/all_DNA.Rdata")
+load("/Users/doms/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/sig.summaries_pval_corr/all_DNA_pval_corr_2022-02-22.Rdata")
+
 all_dna<- all_files
-load("/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/sig.summaries/all_RNA.Rdata")
+load("/Users/doms/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/sig.summaries_pval_corr/all_RNA_pval_corr_2022-02-22.Rdata")
 all_rna <- all_files
 all_rna$dna.rna<-"RNA"
 all_dna$dna.rna <- "DNA"
 all_dna_rna <- rbind(all_dna, all_rna)
-save(all_dna_rna,file="/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_18032021_GW.Rdata")
+save(all_dna_rna,file="/Users/doms/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_22022022_pvalcorr_GW.Rdata")
  ####### GW #######
 all_unique <- all_dna_rna %>% 
   distinct(chr, start.LD.pos, stop.LD.pos)
@@ -112,7 +114,7 @@ summary_numbers$unique.P.loci <- c(nrow(all_uniq_dna.P), nrow(all_uniq_rna.P), n
 summary_numbers$min.P <- c(as.character(signif(minP_dna,3)), as.character(signif(minP_rna, 3)), as.character(signif(minP_all,3)))
 summary_numbers$min.addP <- c(as.character(signif(minaddP_dna,3)), as.character(signif(minaddP_rna, 3)), as.character(signif(minaddP_all,3)))
 summary_numbers$min.domP <- c(as.character(signif(mindomP_dna,3)), as.character(signif(mindomP_rna, 3)), as.character(signif(mindomP_all,3)))
-write_csv(summary_numbers, file="~/Documents/PhD/Experiments/Final_QTL_mapping/Results/summary_numbers_associations_GW.csv", quote=F)
+write.table(summary_numbers, file="~/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/summary_numbers_associations_GW_pval_corr.csv", quote=F)
 
 uniq_GW <- all_dna_rna %>% 
   distinct(chr, start.LD.pos, stop.LD.pos)
@@ -188,7 +190,7 @@ summary_numbers$median.PC.genes.per.locus<- c(med_PC_genes_per_locus_dna$`median
 sum_table_to_write<- as.data.frame(t(summary_numbers))
 rownames(sum_table_to_write)<- colnames(summary_numbers)
 sum_table_to_write <- sum_table_to_write %>% rownames_to_column("Variable")
-write_delim(sum_table_to_write,"summary_numbers_associations_GW.csv", delim=";", col_names = T)
+write_delim(sum_table_to_write,"summary_numbers_associations_GW_pval_corr.csv", delim=";", col_names = T)
 
 ####### SW #######
 SW_threshold =0.05/32625/118.2177
@@ -199,7 +201,7 @@ all_rna_SW <- all_rna %>%
   filter(peak.P.type<SW_threshold)
 all_dna_rna_SW <- all_dna_rna %>% 
   filter(peak.P.type<SW_threshold)
-save(all_dna_rna_SW,file="/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_18032021_SW.Rdata")
+save(all_dna_rna_SW,file="/Users/doms/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/all_DNA_RNA_22022022_SW_pval_corr.Rdata")
 
 all_unique <- all_dna_rna_SW %>% 
   distinct(chr, start.LD.pos, stop.LD.pos)
@@ -316,7 +318,7 @@ summary_numbers$min.P <- c(as.character(signif(minP_dna,3)), as.character(signif
 summary_numbers$min.addP <- c(as.character(signif(minaddP_dna,3)), as.character(signif(minaddP_rna, 3)), as.character(signif(minaddP_all,3)))
 summary_numbers$min.domP <- c(as.character(signif(mindomP_dna,3)), as.character(signif(mindomP_rna, 3)), as.character(signif(mindomP_all,3)))
 
-# load("/Users/doms/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/genes_DNA_RNA.Rdata")
+# load("/Users/doms/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/genes_DNA_RNA.Rdata")
 # uniq_GW <- genes_DNA_RNA %>% 
 #   distinct(chr, start, stop)
 
@@ -347,8 +349,8 @@ loci_per_trait_uniq_dna <- all_dna_SW%>% group_by(trait) %>% distinct(chr,start.
 tot_med_per_trait_all_uniq_dna<-median(loci_per_trait_uniq_dna$n)
 tot_mean_per_trait_all_uniq_dna<-mean(loci_per_trait_uniq_dna$n)
 
-write.table(loci_per_trait_uniq_dna, "sig_loci_per_trait_dna.txt")
-write.table(loci_per_trait_uniq_rna, "sig_loci_per_trait_rna.txt")
+write.table(loci_per_trait_uniq_dna, "sig_loci_per_trait_dna_pval_corr.txt")
+write.table(loci_per_trait_uniq_rna, "sig_loci_per_trait_rna_pval_corr.txt")
 
 summary_numbers$mean.loci.per.trait <- c(signif(tot_mean_per_trait_dna,2), signif(tot_mean_per_trait_rna,2), signif(tot_mean_per_trait_all,2))
 summary_numbers$median.loci.per.trait <- c(tot_med_per_trait_dna, tot_med_per_trait_rna, tot_med_per_trait_all)
@@ -396,6 +398,6 @@ summary_numbers$median.PC.genes.per.locus<- c(med_PC_genes_per_locus_dna$`median
 sum_table_to_write<- as.data.frame(t(summary_numbers))
 rownames(sum_table_to_write)<- colnames(summary_numbers)
 sum_table_to_write <- sum_table_to_write %>% rownames_to_column("Variable")
-write_delim(sum_table_to_write,"summary_numbers_associations_SW.csv", delim=";", col_names = T)
+write_delim(sum_table_to_write,"summary_numbers_associations_SW_pval_corr.csv", delim=";", col_names = T)
 
 

@@ -1,4 +1,4 @@
-setwd("~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/genes_overlap/SW/")
+setwd("~/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/Genes/genes_overlap/SW/")
 
 library(tidyverse)
 library(biomaRt)
@@ -7,7 +7,7 @@ mm10 <- read.table("../mouse.mm10.genome")
 colnames(mm10)<- c("chr", "chr_len")
 
 
-overlaps <- read_delim("bed_intersect_out.txt",delim = "\t", col_names = F)
+overlaps <- read_delim("bed_intersect_out_pval_corr.txt",delim = "\t", col_names = F)
 colnames(overlaps)<- c("chrA", "startA", "endA","chrB", "startB", "endB", "width")
 overlap_intervals <- overlaps %>% 
   rowwise() %>% 
@@ -67,8 +67,8 @@ snp_plot <- ggplot()+
   coord_flip() + scale_color_viridis_c(option="magma", direction = -1, limits=c(0,10)) + 
   labs(y="Position (Mb)", x= "Chromosome", color="Times found in other studies") +theme_test()
 snp_plot + scale_x_discrete(limits=factor(goodChrOrder))
-ggsave("overlapping_studies_intervals_SW.pdf")
-write_delim(output, "freq_overlaps.csv", delim=";")
+ggsave("overlapping_studies_intervals_SW_pval_corr.pdf")
+write_delim(output, "freq_overlaps_pval_corr.csv", delim=";")
 
 ### get genes in intervals #### 
 gene.ensembl <- useEnsembl(biomart = "ensembl", dataset = "mmusculus_gene_ensembl", mirror = "www") # can take long
@@ -121,5 +121,5 @@ for (i in 1:nrow(output)){
   }
   
 }
-save(output, file="freq_overlap.Rdata")
+save(output, file="freq_overlap_pval_corr.Rdata")
 

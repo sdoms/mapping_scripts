@@ -7,7 +7,7 @@
   require(patchwork)
   require(tidyverse)
   
-  
+  DNAorRNA<- "RNA"
   ### Set PATH so that the system command can use bioconda installed packages
   # Sys.setenv (PATH=paste(Sys.getenv("PATH"), "/Users/turner/miniconda3/bin", sep=":"))
   
@@ -18,14 +18,14 @@
   #INPUTS##
   #list of traits mapped - match folder names - the one specified here has list of traits then dummy column
   #trait_list <- read_csv2("~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/trait.list.dna2.csv")
-  trait_list <- read_delim("~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/trait.list.rna.csv", delim=";")
+  trait_list <- read_delim(paste0("~/Documents/Research/Experiments/Final_QTL_mapping/Scripts/Data/trait.list.", tolower(DNAorRNA),".csv"), delim=";")
   
   Xtrue = T
   #folder that has a results folder for each trait
-  #results.folder="~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/DNA/"
-  results.folder="~/Documents/PhD/Experiments/Final_QTL_mapping/Results/Bacterial traits/RNA/"
+
+  results.folder=paste0("~/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/", DNAorRNA, "/")
   #make output folder for sig summaries
-  output.folder=paste0(results.folder,"sig.summaries/")
+  output.folder=paste0(results.folder,"sig.summaries_pval_corr/")
   dir.create(output.folder, showWarnings = FALSE)
   setwd(output.folder)
   ###LMT - combine all chr results into 1 file and add fdr
@@ -37,26 +37,22 @@
     # tax_list=tax_list[-8,1]
     # tax_list=tax_list[-73,1]
 
-
+    chrom_range <- c(1:19, "X")
     for (j in 1:nrow(tax_list)){
   gws=as.character(tax_list[j,1])
-  gwscan <- data.frame()
-  chrom_range <- c(1:19)
-  for (chr in 1:19){
-    tx <- readRDS(paste0(results.folder,trait,"/",gws, "_chr_", chr, "with_add_dom.rds"))
-    gwscan <- rbind(gwscan, tx)
-  }
-  gwscan$add.P.fdr=p.adjust(gwscan$add.P,method = "fdr")
-  gwscan$dom.P.fdr=p.adjust(gwscan$dom.P,method = "fdr")
-  if (Xtrue){
-    X_chrom <- readRDS(paste0(results.folder,trait,"/",gws, "_chrX.rds"))
-    #X_chrom$chr <- "20"
-    gwscan <- dplyr::bind_rows(gwscan, X_chrom)
-    chrom_range <- c(1:19, "X")
-  }
-  gwscan$P.fdr=p.adjust(gwscan$P,method = "fdr")
-  #reorder columns
-  gwscan=gwscan[,c(21,1:20,24,22,23)]
+  if (DNAorRNA=="RNA" & gws=="SV9") next
+
+
+  load(paste0("~/Documents/Research/Experiments/Final_QTL_mapping/Results/Bacterial traits/", DNAorRNA,"/", trait,
+              "/", gws, "with_add_dom_pval_corrected.rData"))
+  gwscan<- gws_tot
+    gwscan$add.P.fdr=p.adjust(gwscan$add.P_corrected,method = "fdr")
+  gwscan$dom.P.fdr=p.adjust(gwscan$dom.P_corrected,method = "fdr")
+  gwscan$P.fdr=p.adjust(gwscan$P_corrected,method = "fdr")
+  #reorder columns and remove P values before correction
+  gwscan=gwscan[,c(21,1:17,22:27)]
+  # rename the columns with corrected P values for downstream code
+  gwscan<- gwscan %>% rename("P"=P_corrected, "add.P"=add.P_corrected, "dom.P"=dom.P_corrected)
   #round to 3 sig figs
   gwscan[,13:24]=signif(gwscan[,13:24],3)
   #change position from Mb to bp 
@@ -101,7 +97,7 @@
   
 #Get significant intervals
 #load all snp info for expanding intervals by including snps in LD - see below
-  load("~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/preLDpruneSNPs.Rdata")
+  load("~/Documents/Research/Experiments/Final_QTL_mapping/Scripts/Data/genotypes/preLDpruneSNPs.Rdata")
   preLDpruneSNPs$pos=preLDpruneSNPs$pos*1e6
 #set P.type to P add.P or dom.P; sig.type to fdr or bon
   #P.type = "dom.P"
@@ -145,7 +141,7 @@ for(P.type in c("P","add.P","dom.P")){
     sig.bins$stop.LD.pos=sig.bins$stop.pos
     for(l in 1:nrow(sig.bins)) {
       snp=sig.bins$start.snp[l]
-      system(paste0("plink --bfile ~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/hybrid_f2_5 -r2 --ld-snp ",snp," --ld-window-kb 10000 --ld-window-r2 0.9 --ld-window 99999 --allow-extra-chr"))
+      system(paste0("plink --bfile ~/Documents/Research/Experiments/Final_QTL_mapping/Scripts/Data/genotypes/hybrid_f2_5 -r2 --ld-snp ",snp," --ld-window-kb 10000 --ld-window-r2 0.9 --ld-window 99999 --allow-extra-chr"))
       ld_set <- read.table("plink.ld", header=T)
       rownames(ld_set)<- ld_set$SNP_B
       ld_set$marker <- ld_set$SNP_B
@@ -154,7 +150,7 @@ for(P.type in c("P","add.P","dom.P")){
       if(sig.bins$sig.snps[l]==1) sig.bins$stop.LD.pos[l] <- max(c(ld_set$pos, sig.bins$stop.pos[l])) 
       if(sig.bins$sig.snps[l]>1) {
         snp=sig.bins$stop.snp[l]
-        system(paste0("plink --bfile ~/Documents/PhD/Experiments/Final_QTL_mapping/Scripts/Summary_tables/hybrid_f2_5 -r2 --ld-snp ",snp," --ld-window-kb 10000 --ld-window-r2 0.9 --ld-window 99999 --allow-extra-chr"))
+        system(paste0("plink --bfile ~/Documents/Research/Experiments/Final_QTL_mapping/Scripts/Data/genotypes/hybrid_f2_5 -r2 --ld-snp ",snp," --ld-window-kb 10000 --ld-window-r2 0.9 --ld-window 99999 --allow-extra-chr"))
         ld_set <- read.table("plink.ld", header=T)
         rownames(ld_set)<- ld_set$SNP_B
         ld_set$marker <- ld_set$SNP_B
@@ -228,6 +224,7 @@ rownames(sig.intervals.comb)=1:nrow(sig.intervals.comb)
     max_snp=sig.intervals.comb$peak.snp[j]
     pos_max_snp=sig.intervals.comb$peak.pos[j]
     gwscan_sig_sub=gwscan_sig[gwscan_sig[,paste0(P.type,".sig.",sig.type)]=="Y",]
+    rownames(gwscan_sig_sub)<- gwscan_sig_sub$marker
     #get genes in region using bioMart
     out.bm.genes.region <- getBM(
       attributes = c('start_position','end_position','ensembl_gene_id','external_gene_name', 'gene_biotype', "description"), 

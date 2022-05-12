@@ -105,11 +105,10 @@ null_model <- relmatLmer(tax ~ (1|mating.pair)+ (1|id), df,relmat=list(id=kinshi
 # heritability
 h2 <- VarProp(null_model)
 
-null_model_reduced <- update(null_model, . ~ . - (1|mating.pair))
+# null_model_reduced <- update(null_model, . ~ . - (1|mating.pair))
 m1_null <- update(null_model, . ~ . - (1|id))
 
 rlrt_h2 <- exactRLRT(
-  null_model_reduced, # the reduced model with only the effect to be tested
   mA = null_model, # the full model under the alternative
   m0 = m1_null, # the model under the null
   seed = 1
