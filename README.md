@@ -43,15 +43,15 @@ Using the lme4QTl R package, we calculate a null model with the mating pair and 
 Calculate the genomic inflation and 'correct' the p values: script *revisions/genomic_inflation.R*
 
 # 5. Summary Tables
-*gwascanSummaries.R* and *gwascanSummaries_p_values_corrected.R* combines SNPs within 10Mb from each other into single
+* *gwascanSummaries.R* and *gwascanSummaries_p_values_corrected.R* combines SNPs within 10Mb from each other into single
 regions and expands those regions with SNPs in LD (>0.9). It then
 uses biomart and mm10 mouse genome to determine the genes within those
 intervals.
-*combine_files.R* is used to combine all the genome-wide significant regions from the individual taxa by taxonomic level.
-*combine_files_genomic_control.R* combines the results of p-value corrected when lambdaGC>1.05 with not corrected for lambdaGC<1.05
-*smallest_intervals.R* filters the smallest intervals out and annotates
-*summary_tables_all_snps_SW_22.R* makes overview tables by significant SNPs
-*summary_numbers.R* calculates the summary statistics (ie median interval size, number of significant loci, ...)
+* *combine_files.R* is used to combine all the genome-wide significant regions from the individual taxa by taxonomic level.
+* *combine_files_genomic_control.R* combines the results of p-value corrected when lambdaGC>1.05 with not corrected for lambdaGC<1.05
+* *smallest_intervals.R* filters the smallest intervals out and annotates
+* *summary_tables_all_snps_SW_22.R* makes overview tables by significant SNPs
+* *summary_numbers.R* calculates the summary statistics (ie median interval size, number of significant loci, ...)
 
 
 # 5. Enrichment analysis
@@ -63,9 +63,9 @@ the clusterProfiler R package.
 
 ## Manhattan plots
 
-Script run\_manhattan.R will make the Manhattan plots using the
+* *Script run\_manhattan.R* will make the Manhattan plots using the
 pretty\_manhattan.R script for each trait. Script
-run\_overlay\_manhattan.r takes the minimum P values of all the traits
+* *run\_overlay\_manhattan.r* takes the minimum P values of all the traits
 within one taxonomic level.
 
 ## Region Plots
@@ -81,11 +81,11 @@ information about the significant regions.
 
 ## Effect plots
 
-effect\_plot.R takes a taxa, a taxonomic level, DNA or RNA and a marker
+*effect\_plot.R* takes a taxa, a taxonomic level, DNA or RNA and a marker
 name as input and will plot a boxplot of the abundance for each genotype
 and also prints the consensus genotype for musculus and domesticus mice.
 
-effect\_plot\_error\_bar.R plots it with an error bar instead of a box
+*effect\_plot\_error\_bar.R* plots it with an error bar instead of a box
 plot.
 
 ## Genotyping Plots
@@ -98,16 +98,16 @@ location of the SNPs on the chromomes.
 This folder contains scripts to plot the results on a karyotype like
 plot to visualize the density of genomic regions associated with
 bacterial traits.
-*Intervals_density_plot.R* will produce panel A of Figure 2.
-*density_results_snps.R* will produce panel B of Figure 2.
+* *Intervals_density_plot.R* will produce panel A of Figure 2.
+* *density_results_snps.R* will produce panel B of Figure 2.
 
 # 7. Other
 
 ## Percentage of variance explained (PVE)
 
-*PVE\_SNP\_model.R* shows how to calculate to PVE of each SNP using a
+* *PVE\_SNP\_model.R* shows how to calculate to PVE of each SNP using a
 model and PVE\_snp.R using a formula.
-*PVE\_all\_snp\_RNA.R* and *PVE\_all\_snp\_DNA.R* are used to calculate a polygenic score equivalent in order to determine the percentage of variance explained by all the significant SNPs for one trait.
+* *PVE\_all\_snp\_RNA.R* and *PVE\_all\_snp\_DNA.R* are used to calculate a polygenic score equivalent in order to determine the percentage of variance explained by all the significant SNPs for one trait.
 
 ## matSpDLite
 
