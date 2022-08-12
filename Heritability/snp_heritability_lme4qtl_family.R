@@ -233,11 +233,13 @@ lme4qtl_rna<- readxl::read_excel("lme4qtl_family.xlsx", sheet="RNA")
 cospec <- read.table("../cospeciation_rates.csv", sep=";", header=T)
 
 lme4qtl_dna %>% inner_join(cospec, by=c("taxa"="tax")) %>% 
-  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+stat_cor(label.x = 0.4, label.y=0.8, col="blue")+
+  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+
+  stat_cor(label.x = 0.4, label.y=0.8, col="blue", method = "spearman")+
   labs(x="h2SNP", y="Cospeciation rate")+ggtitle("DNA")+geom_text_repel(aes(label = taxa), size = 3)
 ggsave("cospeciation_lme4qtl_family_all_DNA.pdf")
 lme4qtl_rna %>% inner_join(cospec, by=c("taxa"="tax")) %>% 
-  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+stat_cor(label.x = 0.4, label.y=0.8, col="blue")+
+  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+
+  stat_cor(label.x = 0.4, label.y=0.8, col="blue", method="spearman")+
   labs(x="h2SNP", y="Cospeciation rate")+ggtitle("RNA")+geom_text_repel(aes(label = taxa), size = 3)
 ggsave("cospeciation_lme4qtl_family_all_RNA.pdf")
 
@@ -330,3 +332,66 @@ inner_join(lme4qtl_dna, lme4qtl_rna, by="taxa") %>% filter(rlrt.x<0.05&rlrt.y<0.
   geom_text_repel(aes(label = taxa), size = 3)+ 
   geom_abline(intercept=0, slope=1, linetype="dashed", color="red", alpha=0.7) 
 ggsave("correlation_DNA_RNA_family_sig_only.pdf")
+
+### standardised ####
+
+lme4qtl_dna<- readxl::read_excel("lme4_mating_pair_family_standardised.xlsx", sheet="DNA")
+
+lme4qtl_rna<- readxl::read_excel("lme4_mating_pair_family_standardised.xlsx", sheet="RNA")
+
+
+cospec <- read.table("../cospeciation_rates.csv", sep=";", header=T)
+
+lme4qtl_dna %>% rename("taxa"="...1") %>% inner_join(cospec, by=c("taxa"="tax")) %>% 
+  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+
+  stat_cor(label.x = 0.4, label.y=0.8, col="blue", method="spearman")+
+  labs(x="h2SNP", y="Cospeciation rate")+ggtitle("DNA")+geom_text_repel(aes(label = taxa), size = 3)
+ggsave("cospeciation_lme4qtl_family_all_stand_DNA.pdf")
+lme4qtl_rna %>% rename("taxa"="...1") %>% inner_join(cospec, by=c("taxa"="tax")) %>% 
+  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+
+  stat_cor(label.x = 0.4, label.y=0.9, col="blue", method="spearman")+
+  labs(x="h2SNP", y="Cospeciation rate")+ggtitle("RNA")+geom_text_repel(aes(label = taxa), size = 3)
+ggsave("cospeciation_lme4qtl_family_all_stand_RNA.pdf")
+
+
+lme4qtl_dna %>% rename("taxa"="...1")%>% filter(rlrt<0.05) %>%  inner_join(cospec, by=c("taxa"="tax")) %>% 
+  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+stat_cor(label.x = 0.4, label.y=0.8, col="blue")+
+  labs(x="h2SNP", y="Cospeciation rate")+ggtitle("DNA")+geom_text_repel(aes(label = taxa), size = 3)
+ggsave("cospeciation_lme4qtl_family_sign_only_DNA.pdf")
+lme4qtl_rna %>% rename("taxa"="...1") %>% filter(rlrt<0.05) %>% inner_join(cospec, by=c("taxa"="tax")) %>% 
+  ggplot(aes(x=h2_id, y=cospeciation))+geom_point() +geom_smooth(method="lm")+stat_cor(label.x = 0.4, label.y=0.8, col="blue")+
+  labs(x="h2SNP", y="Cospeciation rate")+ggtitle("RNA")+geom_text_repel(aes(label = taxa), size = 3)
+ggsave("cospeciation_lme4qtl_family_sign_only_RNA.pdf")
+
+col_pal<- c("light grey","#8F2D56", "#FBB13C","#218380" )
+
+
+lme4qtl_dna %>% rename("taxa"="...1")%>% 
+  mutate(taxa=forcats::fct_reorder(taxa,as.numeric(h2_id))) %>% 
+  dplyr::select(taxa, h2_id, h2_mating_pair,h2_family, h2_residual) %>% 
+  pivot_longer(!taxa,names_to="h2_kind", values_to="h2_estimate") %>% 
+  mutate(h2_kind=factor(h2_kind, levels=c("h2_residual","h2_family","h2_mating_pair","h2_id" ))) %>% 
+  
+  ggplot(aes(x=taxa, y=h2_estimate))+geom_bar(aes(fill=h2_kind),position="stack",stat="identity")+coord_flip() +
+  labs(x="", y="Heritability estimate", fill="")+ggtitle("DNA")+ scale_fill_manual(values = col_pal)
+ggsave("all_heritability_estimates_DNA_family_stand.pdf", height=15)
+
+lme4qtl_dna %>% rename("taxa"="...1")%>% filter(rlrt<0.05) %>% 
+  mutate(taxa=forcats::fct_reorder(taxa,as.numeric(h2_id))) %>% 
+  dplyr::select(taxa, h2_id, h2_mating_pair,h2_family, h2_residual) %>% 
+  pivot_longer(!taxa,names_to="h2_kind", values_to="h2_estimate") %>% 
+  mutate(h2_kind=factor(h2_kind, levels=c("h2_residual","h2_family","h2_mating_pair","h2_id" ))) %>% 
+  
+  ggplot(aes(x=taxa, y=h2_estimate))+geom_bar(aes(fill=h2_kind),position="stack",stat="identity")+coord_flip() +
+  labs(x="", y="Heritability estimate", fill="")+ggtitle("DNA")+ scale_fill_manual(values = col_pal)
+ggsave("all_heritability_estimates_DNA_family_sign_stand.pdf", height=10)
+
+lme4qtl_rna %>% rename("taxa"="...1")%>% filter(rlrt<0.05) %>% 
+  mutate(taxa=forcats::fct_reorder(taxa,as.numeric(h2_id))) %>% 
+  dplyr::select(taxa, h2_id, h2_mating_pair,h2_family, h2_residual) %>% 
+  pivot_longer(!taxa,names_to="h2_kind", values_to="h2_estimate") %>% 
+  mutate(h2_kind=factor(h2_kind, levels=c("h2_residual","h2_family","h2_mating_pair","h2_id" ))) %>% 
+  
+  ggplot(aes(x=taxa, y=h2_estimate))+geom_bar(aes(fill=h2_kind),position="stack",stat="identity")+coord_flip() +
+  labs(x="", y="Heritability estimate", fill="")+ggtitle("RNA")+ scale_fill_manual(values = col_pal)
+ggsave("all_heritability_estimates_RNA_family_sign_stand.pdf", height=10)
